@@ -88,7 +88,7 @@ def calculate_feature_importances(regressor, X_train):
     plt.xticks(range(X_train.shape[1]), names, rotation=90)
 
     # Save figure
-    plt.savefig(f'results/Random_Forest_Regression_importances.png')
+    plt.savefig(f'results/rfr_default/Random_Forest_Regression_importances.png')
     plt.clf()
 
 
