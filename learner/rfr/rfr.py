@@ -186,13 +186,14 @@ def gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_sp
               for preds in gbr.staged_predict(X_test)]
     best_n_estimators = np.argmin(errors) + 1
 
-    # Plot
-    sns.set(rc={'figure.figsize': (15, 6)})
-    g = sns.lineplot(x=range(1071), y=errors)
-    g.set_title(f'Best number of estimators at {best_n_estimators}')
-    g.set_xlabel('Number of estimators')
-    g.set_ylabel('MSE');
-    g.figure.savefig(f'results/gbr_{train_split}.png')
+    # Crate line plot for the prediction with matplotlib
+    plt.style.use(['science', 'bright', 'grid'])
+    plt.plot(range(1071), errors)
+    plt.title(f'Best number of estimators at {best_n_estimators}')
+    plt.xlabel('Number of estimators')
+    plt.ylabel('MSE')
+    plt.savefig(f'results/gbr_{train_split}_2.png')
+
 
 
 def correlations(df):
@@ -202,7 +203,6 @@ def correlations(df):
 
     # Plot heatmap
     plt.figure(dpi=600)
-
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
     plt.savefig('results/correlation_matrix.png')
     plt.clf()
