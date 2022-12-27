@@ -1,13 +1,16 @@
-import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import *
 import scienceplots
+import seaborn as sns
+
+from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
+from sklearn.metrics import *
+from sklearn.preprocessing import StandardScaler
+
+from sklearn.pipeline import Pipeline
 
 
 def rfr_test():
@@ -46,14 +49,13 @@ def random_forest_regressor_default(X_train, y_train, X_test, y_test, train_spli
     # Caluclate feature imporances.
     calculate_feature_importances(regressor, X_train)
 
-    #
     y_pred = regressor.predict(X_test)
 
     # Calculate mean squared error and root mean squared error
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
-    print(f'mse: {round(mse, 3)}')
-    print(f'rmse: {round(rmse, 3)}')
+    # print(f'mse: {round(mse, 3)}')
+    # print(f'rmse: {round(rmse, 3)}')
 
     oop = regressor.oob_score_
 
@@ -98,6 +100,10 @@ def rfr_prepare_data(input_directory, train_split):
     # Get consolidated csv file
     df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
 
+    correlations(df)
+
+    print(f'Number of samples: {len(df.index)}')
+
     X = df[['distance', 'thickness', 'die_opening']]
     y = df['springback']
 
@@ -108,12 +114,12 @@ def rfr_prepare_data(input_directory, train_split):
     X_train = X[X['die_opening'] != train_split]
     y_train = y[X['die_opening'] != train_split]
 
-    return X_train, y_train, X_test, y_test
+    return X, y, X_train, y_train, X_test, y_test
 
 
 def random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split):
     # adaboost = AdaBoostRegressor(n_estimators=10, random_state=0)
-    adaboost = AdaBoostRegressor(random_state=0)
+    adaboost = AdaBoostRegressor()
     adaboost.fit(X_train, y_train)
 
     # Predict test set
@@ -122,8 +128,8 @@ def random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split):
     # Calculate mse and rmse
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
-    print(f'mse: {round(mse, 3)}')
-    print(f'rmse: {round(rmse, 3)}')
+    # print(f'mse: {round(mse, 3)}')
+    # print(f'rmse: {round(rmse, 3)}')
 
     params = adaboost.get_params()
     description = f'{params["n_estimators"]} estimators'
@@ -135,6 +141,7 @@ def create_predict_scatter(output_path, name, y_test, y_pred, description, train
     # Calculate mse and rmse
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
+    print(f'{name}')
     print(f'mse: {round(mse, 3)}')
     print(f'rmse: {round(rmse, 3)}')
 
@@ -151,7 +158,53 @@ def create_predict_scatter(output_path, name, y_test, y_pred, description, train
                  fontsize=8)
     plt.xlabel('RM')
     plt.ylabel('Price')
-    plt.savefig(f'{output_path}{name}{train_split}.png')
+    plt.savefig(f'{output_path}{name}{train_split}_new.png')
+    plt.clf()
+
+
+def gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_split):
+    # steps = [
+    #     ('scale', StandardScaler()),
+    # ('GBR', GradientBoostingRegressor(n_estimators=500, learning_rate=0.03))
+    # ]
+
+    gbr_default = GradientBoostingRegressor().fit(X_train, y_train)
+
+    # Model
+    gbr = GradientBoostingRegressor(n_estimators=1071, learning_rate=0.3).fit(X_train, y_train)
+
+    # Predict
+    y_pred = gbr.predict(X_test)
+    y_pred_default = gbr_default.predict(X_test)
+
+    # RMSE of the predictions
+    print(f'RMSE: {round(np.sqrt(mean_squared_error(y_test, y_pred)), 4)}')
+    print(f'RMSE: {round(np.sqrt(mean_squared_error(y_test, y_pred_default)), 4)}')
+
+    # Loop for the best number
+    errors = [mean_squared_error(y_test, preds)
+              for preds in gbr.staged_predict(X_test)]
+    best_n_estimators = np.argmin(errors) + 1
+
+    # Plot
+    sns.set(rc={'figure.figsize': (15, 6)})
+    g = sns.lineplot(x=range(1071), y=errors)
+    g.set_title(f'Best number of estimators at {best_n_estimators}')
+    g.set_xlabel('Number of estimators')
+    g.set_ylabel('MSE');
+    g.figure.savefig(f'results/gbr_{train_split}.png')
+
+
+def correlations(df):
+    print('Plotting Correlations')
+    # Create correlation matrix
+    df.corr().style.background_gradient(cmap='coolwarm')
+
+    # Plot heatmap
+    plt.figure(dpi=600)
+
+    sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+    plt.savefig('results/correlation_matrix.png')
     plt.clf()
 
 
@@ -164,6 +217,7 @@ if __name__ == '__main__':
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
-    X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
-    random_forest_regressor_default(X_train, y_train, X_test, y_test, train_split)
-    random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split)
+    X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
+    # random_forest_regressor_default(X_train, y_train, X_test, y_test, train_split)
+    # random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split)
+    gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_split)
