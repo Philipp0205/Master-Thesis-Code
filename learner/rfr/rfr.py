@@ -8,6 +8,7 @@ import seaborn as sns
 
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.metrics import *
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.pipeline import Pipeline
@@ -38,32 +39,82 @@ def rfr_test():
     # plt.savefig('results/Random_Forest_Regression_100_trees.png')
 
 
-def random_forest_regressor_default(X_train, y_train, X_test, y_test, train_split):
+def random_forest(X_train, y_train, X_test, y_test, train_split):
+    # Create random forest regressors with different numbers of trees
+    regr_1 = RandomForestRegressor(random_state=0, n_estimators=1)
+    regr_100 = RandomForestRegressor(random_state=0, n_estimators=100)
+    reg_200 = RandomForestRegressor(random_state=0, n_estimators=200)
+
+    # Train the regressors
+    regr_1.fit(X_train, y_train)
+    regr_100.fit(X_train, y_train)
+    reg_200.fit(X_train, y_train)
+
+    # Predict on new data
+    y_pred_1 = regr_1.predict(X_test)
+    y_pred_100 = regr_100.predict(X_test)
+    y_pred_200 = reg_200.predict(X_test)
+
+    # Create scatters for all predictions
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_1_tree', y_test, y_pred_1, 'Random Forest 1 Tree',
+                           train_split)
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_100_trees', y_test, y_pred_100,
+                           'Random Forest 100 Trees', train_split)
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_200_trees', y_test, y_pred_200,
+                           'Random Forest 200 Trees', train_split)
+
+
+def random_forest_default(X_train, y_train, X_test, y_test, train_split):
     # Create a random forest regressor
     # regressor = RandomForestRegressor(n_estimators=10, random_state=0, criterion='squared_error', oob_score=True)
-    regressor = RandomForestRegressor(random_state=0, criterion='squared_error', oob_score=True)
+    regressor_default = RandomForestRegressor(random_state=0, criterion='squared_error', oob_score=True)
+    regressor_100 = RandomForestRegressor(random_state=0, criterion='squared_error', n_estimators=200)
 
     # Train the regressor
-    regressor.fit(X_train, y_train)
+    regressor_default.fit(X_train, y_train)
+    regressor_100.fit(X_train, y_train)
 
     # Caluclate feature imporances.
-    calculate_feature_importances(regressor, X_train)
+    calculate_feature_importances(regressor_default, X_train)
 
-    y_pred = regressor.predict(X_test)
+    y_pred = regressor_default.predict(X_test)
 
-    # Calculate mean squared error and root mean squared error
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
-    # print(f'mse: {round(mse, 3)}')
-    # print(f'rmse: {round(rmse, 3)}')
+    parameters = {
+        'n_estimators': [1, 10, 100, 1000],
+        'max_depth': [1, 10, 100, 1000],
+    }
+    regr = RandomForestRegressor(random_state=0, n_estimators=1, criterion='squared_error')
 
-    oop = regressor.oob_score_
+    clf = GridSearchCV(regr, parameters)
 
-    params = regressor.get_params()
-    description = f'{params["n_estimators"]} estimators, oop: {round(oop, 2)}'
+    clf.fit(X_train, y_train)
 
-    # Create a scatter plot for the prediction
+    oop = regressor_default.oob_score_
+    clf.fit(X_train, y_train)
+    regr.fit(X_train, y_train)
+
+    y_pred2 = clf.predict(X_test)
+    y_pred3 = regr.predict(X_test)
+    y_pred4 = regressor_100.predict(X_test)
+
+    # Print n_estimators
+    print(f'Default Regressor parameters: {regressor_default.get_params()["n_estimators"]}')
+    print("Tuned Random Forest Parameters: {}".format(clf.best_params_))
+    print(f"Tuned Random Forest Parameters 100: {regressor_100.get_params()['n_estimators']}")
+
+    params = regressor_default.get_params()
+    description = f'Random Forest Default'
     create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression', y_test, y_pred, description, train_split)
+
+    description = f'Random Forest Tuned'
+    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED', y_test, y_pred2, description,
+                           train_split)
+
+    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED2', y_test, y_pred3, description,
+                           train_split)
+
+    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED100', y_test, y_pred3, description,
+                           train_split)
 
 
 def calculate_feature_importances(regressor, X_train):
@@ -142,8 +193,8 @@ def create_predict_scatter(output_path, name, y_test, y_pred, description, train
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
     print(f'{name}')
-    print(f'mse: {round(mse, 3)}')
-    print(f'rmse: {round(rmse, 3)}')
+    print(f'mse: {round(mse, 5)}')
+    print(f'rmse: {round(rmse, 5)}')
 
     # Create scatter plot for results
     plt.style.use(['science', 'scatter', 'bright', 'grid'])
@@ -181,9 +232,14 @@ def gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_sp
     print(f'RMSE: {round(np.sqrt(mean_squared_error(y_test, y_pred)), 4)}')
     print(f'RMSE: {round(np.sqrt(mean_squared_error(y_test, y_pred_default)), 4)}')
 
-    # Loop for the best number
     errors = [mean_squared_error(y_test, preds)
               for preds in gbr.staged_predict(X_test)]
+
+    find_best_n_estimators(errors, "gradient_boosting")
+
+
+def find_best_n_estimators(errors, name):
+    # Loop for the best number
     best_n_estimators = np.argmin(errors) + 1
 
     # Crate line plot for the prediction with matplotlib
@@ -192,8 +248,7 @@ def gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_sp
     plt.title(f'Best number of estimators at {best_n_estimators}')
     plt.xlabel('Number of estimators')
     plt.ylabel('MSE')
-    plt.savefig(f'results/gbr_{train_split}_2.png')
-
+    plt.savefig(f'results/{name}_best_n_estimators.png')
 
 
 def correlations(df):
@@ -218,6 +273,7 @@ if __name__ == '__main__':
     input_directory = project_root / 'data' / 'dataset'
 
     X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
-    # random_forest_regressor_default(X_train, y_train, X_test, y_test, train_split)
+    # random_forest_default(X_train, y_train, X_test, y_test, train_split)
+    random_forest(X_train, y_train, X_test, y_test, train_split)
     # random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split)
-    gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_split)
+    # gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_split)
