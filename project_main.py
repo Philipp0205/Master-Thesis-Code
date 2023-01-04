@@ -9,7 +9,7 @@ if __name__ == '__main__':
     # tra_output_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3/cleared/'
     # springback_output_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3/results/'
 
-    parent_folder = 'data/dataset/'
+    parent_folder = 'data/dataset/V50/'
 
     tra_input_directory = f'{parent_folder}tra/'
     tra_output_directory = f'{parent_folder}cleared/'
@@ -22,8 +22,6 @@ if __name__ == '__main__':
 
     consolidate_all_data_into_one_file()
 
-    visualize_dataset()
-
-    # plot_all_cycles(tra_output_directory, springback_output_directory)
+    # visualize_dataset()
 
     print('Done!')

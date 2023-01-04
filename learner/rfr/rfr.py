@@ -9,7 +9,11 @@ import seaborn as sns
 from sklearn.ensemble import RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.metrics import *
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+from sklearn.pipeline import Pipeline
 
 from sklearn.pipeline import Pipeline
 
@@ -56,7 +60,8 @@ def random_forest(X_train, y_train, X_test, y_test, train_split):
     y_pred_200 = reg_200.predict(X_test)
 
     # Create scatters for all predictions
-    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_1_tree', y_test, y_pred_1, 'Random Forest 1 Tree',
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_1_tree', y_test, y_pred_1,
+                           'Random Forest 1 Tree',
                            train_split)
     create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_100_trees', y_test, y_pred_100,
                            'Random Forest 100 Trees', train_split)
@@ -263,6 +268,79 @@ def correlations(df):
     plt.clf()
 
 
+def preprocessing():
+    # Create pipeline and scale the data
+    pipe = Pipeline([("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor())])
+
+    # Fit the pipeline
+    # pipe.fit(X_train, y_train)
+
+    # Predict
+    # print("Test score: {:.2f}".format(pipe.score(X_test, y_test)))
+
+    return pipe
+
+
+def grid_search(pipe, X_train, y_train, X_test, y_test):
+    print('----------- Grid Search -----------')
+    # Parameters for grid search random forest regressor
+    param_grid = {'rfr__n_estimators': [1, 2, 3, 10, 20, 30, 31, 32, 33, 34, 35, 100],
+                  'rfr__max_depth': [1, 2, 3, 4, 5, 10, 20, 30, 100],
+                  'rfr__min_samples_split': [2, 4],
+                  'rfr__min_samples_leaf': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ],
+                  'rfr__bootstrap': [True, False],
+                  'rfr__criterion': ['squared_error', 'absolute_error'],
+                  }
+
+    grid = GridSearchCV(pipe, param_grid=param_grid, cv=5, n_jobs=1)
+    grid.fit(X_train, y_train)
+
+    print("Best cross-validation accuracy: {:.2f}".format(grid.best_score_))
+    print("Test set score: {:.2f}".format(grid.score(X_test, y_test)))
+    print("R2 score: {:.2f}".format(r2_score(y_test, grid.predict(X_test))))
+    print("Best parameters: {}".format(grid.best_params_))
+
+
+def random_test_train_split(input_directory):
+    df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
+
+    X = df[['distance', 'thickness', 'die_opening']]
+    y = df['springback']
+    # Split the data into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    return X, y, X_train, y_train, X_test, y_test
+
+
+def rfr_with_grid_search():
+    print('------- Non random test train split ------')
+    X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
+    pipe2 = preprocessing()
+    grid_search(pipe2, X_train, y_train, X_test, y_test)
+
+
+def rfr_final_after_grid_search(input_directory, train_split):
+    # Best parameters: {'rfr__bootstrap': True, 'rfr__criterion': 'absolute_error', 'rfr__max_depth': 30,
+    # 'rfr__min_samples_leaf': 2, 'rfr__min_samples_split': 4, 'rfr__n_estimators': 10}
+
+    X, y, X_train, y_train, X_test, y_test = random_test_train_split(input_directory, train_split)
+
+    print('------- Final Model ------')
+    pipe = Pipeline(
+        [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                                                   max_depth=30, min_samples_leaf=2,
+                                                                   min_samples_split=4, n_estimators=10))])
+
+    pipe.fit(X_train, y_train)
+    y_pred = pipe.predict(X_test)
+    print("Test set score: {:.2f}".format(pipe.score(X_test, y_test)))
+    print("R2 score: {:.2f}".format(r2_score(y_test, y_pred)))
+    print("RMSE: {:.2f}".format(np.sqrt(mean_squared_error(y_test, y_pred))))
+    print("MAE: {:.2f}".format(mean_absolute_error(y_test, y_pred)))
+
+    print('-----------------')
+
+
 def get_project_root() -> Path:
     return Path(__file__).parent.parent.parent
 
@@ -272,8 +350,9 @@ if __name__ == '__main__':
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
-    X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
-    # random_forest_default(X_train, y_train, X_test, y_test, train_split)
-    random_forest(X_train, y_train, X_test, y_test, train_split)
+    rfr_final_after_grid_search(input_directory, train_split)
+
+
+
     # random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split)
     # gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_split)

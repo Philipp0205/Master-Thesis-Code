@@ -28,7 +28,7 @@ def visualize_dataset():
     plt.style.use(['science', 'scatter', 'grid', 'bright'])
 
     # Plot the dataset with seaborn with diamond markers
-    plt.figure(dpi=600)
+    plt.figure(dpi=1000)
 
     seaborn.scatterplot(x=x, y=y, marker='D', s=40)
 
@@ -55,5 +55,7 @@ def visualize_dataset():
     plt.xlabel('Thickness $t$ [mm]')
     plt.ylabel('Die opening $V$ [mm]')
     plt.savefig('misc/dataset/results/test_train_split.png')
+
+    plt.clf()
 
 

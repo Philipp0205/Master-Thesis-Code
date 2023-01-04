@@ -2,9 +2,11 @@ import glob
 import os
 from pathlib import Path
 
+import matplotlib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scienceplots
 
 import random
 
@@ -50,21 +52,23 @@ def calculate_springback_model(df, name):
     max_force = df['Standardkraft'].max()
     max_force_row = df.loc[df['Standardkraft'] == max_force]
 
-    max_distance = df['Standardweg'].max()
-    max_distance_rows = df.loc[round(df['Standardweg'], 2) == round(max_distance, 2)]
+    # Get the max distance
+    yp_max = df['Standardweg'].max()
+    # Get all rows where the distance is max (punch pentration at max)
+    yp_max_rows = df.loc[round(df['Standardweg'], 2) == round(yp_max, 2)]
 
     # Get last row of max_distance_rows
-    last_row = max_distance_rows.iloc[-1]
-    last_row_x = last_row['Prüfzeit']
-    last_row_y = last_row['Standardkraft']
-    last_row_distance = last_row['Standardweg']
+    last_yp_max_row = yp_max_rows.iloc[-1]
+    last_row_distance = last_yp_max_row['Standardweg']
 
     # Get point where the force is below 1 and after the max force
     df_after_max = df_without_zero[df_without_zero['Prüfzeit'] > max_force_row['Prüfzeit'].values[0]]
 
+    force_threshold = calculate_force_threshold(df_after_max)
+
     # Index error if there is no value below 1
     try:
-        min_force_row = df_after_max[df_after_max['Standardkraft'] < 1].iloc[0]
+        min_force_row = df_after_max[df_after_max['Standardkraft'] < force_threshold].iloc[0]
     except IndexError:
         min_force_row = df_after_max[df_after_max['Standardkraft'] < 3].iloc[0]
 
@@ -74,9 +78,25 @@ def calculate_springback_model(df, name):
     # max_distance = max_force_row['Standardweg']
     springback = last_row_distance - min_force_distance
 
-    springback_model = SpringbackModel(name, max_distance, springback)
+    springback_model = SpringbackModel(name, yp_max, springback, last_yp_max_row, min_force_row, force_threshold)
     return springback_model
 
+
+# Calculates the force threshold which is used to get the second point for the spring back calculation.
+def calculate_force_threshold(df_after_yp_max):
+    # Make copy of dataframe
+    df_after_yp_max = df_after_yp_max.copy()
+
+    # Calculate differences between the 'Standardkraft' values of df_after_yp_max and save it in df_after_yp_max
+    df_after_yp_max['diff'] = df_after_yp_max['Standardkraft'].diff()
+
+    # Drop all rows where 'Standardkraft' is higher then 10
+    df_after_yp_max = df_after_yp_max[df_after_yp_max['Standardkraft'] < 8]
+
+    # Get row with the highest difference
+    max_diff_row = df_after_yp_max[df_after_yp_max['diff'] == df_after_yp_max['diff'].min()]
+
+    return max_diff_row['Standardkraft'].values[0]
 
 def plot_all_springbacks(name, springback_models, output_directory):
     fig, ax1 = plt.subplots()
@@ -84,7 +104,7 @@ def plot_all_springbacks(name, springback_models, output_directory):
     # Get all distances of springback_models
     x_distances = [model.distance for model in springback_models]
     # Get all springbacks of springback_models
-    y_springbacks = [model.springback for model in springback_models]
+    y_springbacks = [model.spring_back for model in springback_models]
 
     distance_springback_diagram_models = []
 
@@ -109,7 +129,7 @@ def plot_all_springbacks(name, springback_models, output_directory):
         # Get all springbacks with distance distance
         # springbacks_for_distance = [model.distance == distance for model in springback_models]
         # Get all springbacks of springback_models with distance distance
-        springbacks_for_distance = [model.springback for model in springback_models if
+        springbacks_for_distance = [model.spring_back for model in springback_models if
                                     round(model.distance, 0) == distance]
         mean_springback = mean(springbacks_for_distance)
 
@@ -121,6 +141,9 @@ def plot_all_springbacks(name, springback_models, output_directory):
 
     plt.grid()
     plt.savefig(f'{output_directory}all-springbacks.png', dpi=600)
+
+    plt.clf()
+    matplotlib.pyplot.close('all')
 
     return DistanceSpringbackDiagramModel(name, x_distances, y_springbacks)
 

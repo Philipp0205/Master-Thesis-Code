@@ -1,29 +1,40 @@
 import os
 from pathlib import Path
 
+import matplotlib
+
+from zyklen.springback_summary_plot import calculate_springback_model
+
 import pandas as pd
 import matplotlib.pyplot as plt
+# project constants
+import misc.project_constants as pc
 
+
+# import science plots
 
 # Plots all files in the directory as single force-time plots.
 def each_tra_to_springback_plot(input_directory, output_directory):
+    # Get all directories in the input directory
     dirs = [x[0] for x in os.walk(input_directory)]
 
+    # Iterate through all directories and look for cleared directory
     for d in dirs:
-        if 'cleared' in d:
+        if pc.cleared_directory in d:
 
             # Get all names of folder
             file_names = os.listdir(f'{d}/')
 
             for name in file_names:
                 # Load csv
-                # df = pd.read_csv(f'{input_directory}{name}', delimiter=';')
                 df = pd.read_csv(f'{d}/{name}', delimiter=';')
                 # calculate_springback(df, name, output_directory)
                 parent_path = Path(d).parent
-                calculate_springback(df, name, f'{parent_path}/results/')
+                # calculate_springback(df, name, f'{parent_path}/{pc.results_directory}/')
+                calculate_spring_back_2(df, name, f'{parent_path}/{pc.results_directory}/')
 
 
+# Calculates the springback for a single file
 def calculate_springback(df, name, output_directory):
     fig, ax1 = plt.subplots()
 
@@ -46,7 +57,9 @@ def calculate_springback(df, name, output_directory):
     # Get point where the force is below 1 and after the max force
     df_after_max = df[df['Prüfzeit'] > max_force_row['Prüfzeit'].values[0]]
 
-    min_force_df = df_after_max[df_after_max['Standardkraft'] < 1]
+    # Get first row where force is below 1
+    # !!!
+    min_force_df = df_after_max[df_after_max['Standardkraft'] < 1.8]
 
     # If min_force_df is an empty dataframe, then do not plot anything
     if min_force_df.empty:
@@ -55,7 +68,6 @@ def calculate_springback(df, name, output_directory):
     min_force_row = min_force_df.iloc[0]
     # min_force_row = df_after_max[df_after_max['Standardkraft'] < 1]
     min_force = min_force_row['Standardkraft']
-
 
     x = df['Prüfzeit']
     y = df['Standardkraft']
@@ -87,6 +99,49 @@ def calculate_springback(df, name, output_directory):
     # ax2.plot(x, y2, color='grey')
 
     plt.savefig(f'{output_directory}{name}_springback.png', dpi=300)
+    plt.clf()
+
+
+def calculate_spring_back_2(df, name, output_directory):
+    fig, ax1 = plt.subplots()
+
+    # plt.style.use(['science', 'bright'])
+
+    spring_back_model = calculate_springback_model(df, name)
+    spring_back = spring_back_model.spring_back
+
+    # Remove rows from df where 'Prüfzeit' is 0
+    df = df[df['Prüfzeit'] > 0]
+
+    x = df['Prüfzeit']
+    y = df['Standardkraft']
+    y2 = df['Standardweg']
+
+    first_point = spring_back_model.start_point
+    last_point = spring_back_model.end_point
+
+    first_point_x = first_point['Prüfzeit']
+    first_point_y = first_point['Standardkraft']
+
+    last_point_x = last_point['Prüfzeit']
+    last_point_y = last_point['Standardkraft']
+
+    # Label the max force point with the springback value
+    ax2 = plt.twinx()
+    ax1.plot(x, y, label=f'sb: {round(spring_back, 3)} threshold: {round(spring_back_model.force_threshold, 2)}')
+    ax1.scatter(first_point_x, first_point_y, color='green', marker='x')
+    ax1.scatter(last_point_x, last_point_y, color='red', marker='x')
+    ax1.set_xlabel('Time [s]')
+    ax1.set_ylabel('Force [N]')
+    ax1.legend()
+
+    # ax2.set_ylabel('Distance (mm)')
+    # ax2.plot(x, y2, color='grey')
+
+    plt.savefig(f'{output_directory}{name}_springback.png', dpi=600)
+    plt.clf()
+
+    matplotlib.pyplot.close('all')
 
 
 def plot_time_force(df):

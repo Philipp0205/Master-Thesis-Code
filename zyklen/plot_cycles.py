@@ -100,7 +100,7 @@ def plot_all_cycles(input_directory, output_directory):
     # Get all distances of springback_models
     x_distances = [model.distance for model in springbacks]
     # Get all springbacks of springback_models
-    y_springbacks = [model.springback for model in springbacks]
+    y_springbacks = [model.spring_back for model in springbacks]
 
     ax1.scatter(x_distances, y_springbacks, color='red',)
     ax1.set_xlabel('Distance [mm]')
