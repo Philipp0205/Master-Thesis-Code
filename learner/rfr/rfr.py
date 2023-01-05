@@ -12,6 +12,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
 
 from sklearn.pipeline import Pipeline
 
@@ -319,13 +320,14 @@ def rfr_with_grid_search():
     grid_search(pipe2, X_train, y_train, X_test, y_test)
 
 
-def rfr_final_after_grid_search(input_directory, train_split):
+def rfr_final_after_grid_search(name, X_train, y_train, X_test, y_test):
     # Best parameters: {'rfr__bootstrap': True, 'rfr__criterion': 'absolute_error', 'rfr__max_depth': 30,
     # 'rfr__min_samples_leaf': 2, 'rfr__min_samples_split': 4, 'rfr__n_estimators': 10}
 
-    X, y, X_train, y_train, X_test, y_test = random_test_train_split(input_directory, train_split)
-
-    print('------- Final Model ------')
+    print(f'------- {name} ------')
+    print(f'Number of training samples: {len(X_train)}')
+    print(f'Number of testing samples: {len(X_test)}')
+    print('-----')
     pipe = Pipeline(
         [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
                                                                    max_depth=30, min_samples_leaf=2,
@@ -333,12 +335,24 @@ def rfr_final_after_grid_search(input_directory, train_split):
 
     pipe.fit(X_train, y_train)
     y_pred = pipe.predict(X_test)
-    print("Test set score: {:.2f}".format(pipe.score(X_test, y_test)))
-    print("R2 score: {:.2f}".format(r2_score(y_test, y_pred)))
-    print("RMSE: {:.2f}".format(np.sqrt(mean_squared_error(y_test, y_pred))))
-    print("MAE: {:.2f}".format(mean_absolute_error(y_test, y_pred)))
-
+    print("MAE: {:.3f}".format(mean_absolute_error(y_test, y_pred)))
+    print("MSE: {:.3f}".format(mean_squared_error(y_test, y_pred)))
+    print("RMSE: {:.3f}".format(np.sqrt(mean_squared_error(y_test, y_pred))))
+    print("R2 score: {:.3f}".format(r2_score(y_test, y_pred)))
     print('-----------------')
+
+    return pipe
+
+
+def calculate_variance_of_cross_validation(X, y, model):
+    scores = cross_val_score(model, X, y, cv=5)
+
+    variance_of_cv = np.var(scores, ddof=1)
+    print(f'Variance of cross validation: {round(variance_of_cv, 3)}')
+
+# Calculate equalized loss of accuracy (ELA).
+def calculate_ela():
+
 
 
 def get_project_root() -> Path:
@@ -350,9 +364,14 @@ if __name__ == '__main__':
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
-    rfr_final_after_grid_search(input_directory, train_split)
+    X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
+    random_test_train_split(input_directory)
+    pipe = rfr_final_after_grid_search('NON Random Test Train Split ', X_train, y_train, X_test, y_test)
 
+    calculate_variance_of_cross_validation(X, y, pipe)
 
+    # X, y, X_train, y_train, X_test, y_test = random_test_train_split(input_directory)
+    # rfr_final_after_grid_search('Random Test Train Split', X_train, y_train, X_test, y_test)
 
     # random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split)
     # gradient_boosting_regressor(X, y, X_train, y_train, X_test, y_test, train_split)
