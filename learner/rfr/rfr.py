@@ -1,3 +1,5 @@
+import pickle
+import time
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +19,9 @@ from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
 
 from sklearn.pipeline import Pipeline
+
+# import leave one out cross validation
+from sklearn.model_selection import LeaveOneOut, KFold
 
 
 def rfr_test():
@@ -153,7 +158,7 @@ def calculate_feature_importances(regressor, X_train):
 
 # Prepate the data for the random forst regression
 # Split data into tain and test set
-def rfr_prepare_data(input_directory, train_split):
+def non_random_split(input_directory, train_split):
     # Get consolidated csv file
     df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
 
@@ -315,7 +320,7 @@ def random_test_train_split(input_directory):
 
 def rfr_with_grid_search():
     print('------- Non random test train split ------')
-    X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
+    X, y, X_train, y_train, X_test, y_test = non_random_split(input_directory, train_split)
     pipe2 = preprocessing()
     grid_search(pipe2, X_train, y_train, X_test, y_test)
 
@@ -332,8 +337,23 @@ def rfr_final_after_grid_search(name, X_train, y_train, X_test, y_test):
         [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
                                                                    max_depth=30, min_samples_leaf=2,
                                                                    min_samples_split=4, n_estimators=10))])
-
+    sample = X_test.iloc[0]
+    start = time.time()
     pipe.fit(X_train, y_train)
+    stop = time.time()
+    s = stop - start
+    print(f"Training time: {s} s")
+
+    sample = X_test.iloc[0]
+    start = time.time()
+    pipe.predict([sample])
+    stop = time.time()
+    ms = (stop - start) * 1000
+
+    print(f"Prediction time (runtime): {ms} ms")
+
+    save_trained_model(pipe, name)
+
     y_pred = pipe.predict(X_test)
     print("MAE: {:.3f}".format(mean_absolute_error(y_test, y_pred)))
     print("MSE: {:.3f}".format(mean_squared_error(y_test, y_pred)))
@@ -350,13 +370,53 @@ def calculate_variance_of_cross_validation(X, y, model):
     variance_of_cv = np.var(scores, ddof=1)
     print(f'Variance of cross validation: {round(variance_of_cv, 3)}')
 
-# Calculate equalized loss of accuracy (ELA).
-def calculate_ela():
 
+def leave_one_out_cross_validation(X, y):
+    pipe = Pipeline(
+        [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                                                   max_depth=30, min_samples_leaf=2,
+                                                                   min_samples_split=4, n_estimators=10))])
+
+    scores = []
+
+    loo = LeaveOneOut()
+
+    # Use the LOOCV object to get the training and test indices for each iteration
+    for train_index, test_index in loo.split(X):
+        # Get the training and test data for this iteration
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+
+        # Fit the regressor to the training data and predict on the test data
+        pipe.fit(X_train, y_train)
+        y_pred = pipe.predict(X_test)
+
+        # Calculate the performance score and store it
+        score = np.mean((y_test - y_pred) ** 2)
+
+        # Append the evaluation score to the scores list
+        scores.append(score)
+
+    # Calculate the mean performance score
+    mean_score = np.mean(scores)
+    # Variance score
+    variance_score = np.var(scores)
+
+    print(f'Leave one out cross validation mean: {round(mean_score, 3)}')
+    print(f'Variance of leave one out cross validation: {round(variance_score, 3)}')
 
 
 def get_project_root() -> Path:
     return Path(__file__).parent.parent.parent
+
+
+# Save trained model to disk
+def save_trained_model(model, name):
+    project_root = get_project_root()
+    output_directory = project_root / 'learner'  /'rfr' / 'saved_models'
+
+    with open(f'{output_directory}/{name}.model', 'wb') as f:
+        pickle.dump(model, f)
 
 
 if __name__ == '__main__':
@@ -364,13 +424,15 @@ if __name__ == '__main__':
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
-    X, y, X_train, y_train, X_test, y_test = rfr_prepare_data(input_directory, train_split)
+    X, y, X_train, y_train, X_test, y_test = non_random_split(input_directory, train_split)
     random_test_train_split(input_directory)
     pipe = rfr_final_after_grid_search('NON Random Test Train Split ', X_train, y_train, X_test, y_test)
 
     calculate_variance_of_cross_validation(X, y, pipe)
 
-    # X, y, X_train, y_train, X_test, y_test = random_test_train_split(input_directory)
+    leave_one_out_cross_validation(X, y)
+
+    # X, y_train, X_test, y_test = random_test_train_split(input_directory)
     # rfr_final_after_grid_search('Random Test Train Split', X_train, y_train, X_test, y_test)
 
     # random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split)
