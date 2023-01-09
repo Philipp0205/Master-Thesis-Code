@@ -1,4 +1,7 @@
 import pickle
+import random
+
+import random_forest
 import time
 from pathlib import Path
 
@@ -158,10 +161,7 @@ def calculate_feature_importances(regressor, X_train):
 
 # Prepate the data for the random forst regression
 # Split data into tain and test set
-def non_random_split(input_directory, train_split):
-    # Get consolidated csv file
-    df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
-
+def non_random_split(df, train_split):
     correlations(df)
 
     print(f'Number of samples: {len(df.index)}')
@@ -328,7 +328,6 @@ def rfr_with_grid_search():
 def rfr_final_after_grid_search(name, X_train, y_train, X_test, y_test):
     # Best parameters: {'rfr__bootstrap': True, 'rfr__criterion': 'absolute_error', 'rfr__max_depth': 30,
     # 'rfr__min_samples_leaf': 2, 'rfr__min_samples_split': 4, 'rfr__n_estimators': 10}
-
     print(f'------- {name} ------')
     print(f'Number of training samples: {len(X_train)}')
     print(f'Number of testing samples: {len(X_test)}')
@@ -413,10 +412,43 @@ def get_project_root() -> Path:
 # Save trained model to disk
 def save_trained_model(model, name):
     project_root = get_project_root()
-    output_directory = project_root / 'learner'  /'rfr' / 'saved_models'
+    output_directory = project_root / 'learner' / 'rfr' / 'saved_models'
 
     with open(f'{output_directory}/{name}.model', 'wb') as f:
         pickle.dump(model, f)
+
+
+def missing_values(df, number_of_missing_values):
+    print('------- Missing values: Removing vt combinations --------')
+    # Iterate through all rows and get all thickness die_opening combinations
+    thickness_die_opening_combinations = []
+
+    for index, row in df.iterrows():
+        thickness_die_opening_combinations.append([row['thickness'], row['die_opening']])
+
+    # Remove duplicates
+    thickness_die_opening_combinations = list(set(tuple(x) for x in thickness_die_opening_combinations))
+    number_of_combinations = len(thickness_die_opening_combinations)
+
+    # Select two numbers between 0 and number_of_combinations
+    random_numbers = random.sample(range(0, number_of_combinations), number_of_missing_values)
+
+    # Get the rows where the index are the random numbers
+    rows_to_remove = []
+    for i in random_numbers:
+        rows_to_remove.append(thickness_die_opening_combinations[i])
+
+    # Remove rows from dataframe
+    remaining_data = df[~df[['thickness', 'die_opening']].apply(tuple, 1).isin(rows_to_remove)]
+
+    # Get removed rows
+    removed_data = df[df[['thickness', 'die_opening']].apply(tuple, 1).isin(rows_to_remove)]
+
+    # print combinations which got removed
+    for i in range(0, len(random_numbers)):
+        print(f'Removed: {thickness_die_opening_combinations[i]}')
+
+    return removed_data, remaining_data
 
 
 if __name__ == '__main__':
@@ -424,13 +456,19 @@ if __name__ == '__main__':
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
-    X, y, X_train, y_train, X_test, y_test = non_random_split(input_directory, train_split)
-    random_test_train_split(input_directory)
-    pipe = rfr_final_after_grid_search('NON Random Test Train Split ', X_train, y_train, X_test, y_test)
+    df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
+    X, y, X_train, y_train, X_test, y_test = non_random_split(df, train_split)
 
-    calculate_variance_of_cross_validation(X, y, pipe)
+    missing_values(X_train, 2)
 
-    leave_one_out_cross_validation(X, y)
+    # random_test_train_split(input_directory)
+    # pipe = rfr_final_after_grid_search('NON Random Test Train Split ', X_train, y_train, X_test, y_test)
+
+    # calculate_variance_of_cross_validation(X, y, pipe)
+
+    # leave_one_out_cross_validation(X, y)
+
+    # Archive
 
     # X, y_train, X_test, y_test = random_test_train_split(input_directory)
     # rfr_final_after_grid_search('Random Test Train Split', X_train, y_train, X_test, y_test)

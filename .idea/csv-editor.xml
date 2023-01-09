@@ -234,6 +234,34 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/lib/python3.8/site-packages/numpy/core/tests/data/umath-validation-set-exp.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/lib/python3.8/site-packages/numpy/core/tests/data/umath-validation-set-log.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/venv/lib/python3.10/site-packages/numpy/core/tests/data/umath-validation-set-exp.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/venv/lib/python3.10/site-packages/numpy/core/tests/data/umath-validation-set-log.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
