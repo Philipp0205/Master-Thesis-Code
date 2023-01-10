@@ -11,6 +11,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestRegressor
 
+from sklearn.model_selection import cross_val_score
+
 import pandas as pd
 
 
@@ -20,17 +22,62 @@ def missing_values_main(X_train, y_train, X_test, y_test):
     # Merge X_train and y_train dataframes
     train = pd.concat([X_train, y_train], axis=1)
 
-    remaining_X_test, remaining_y_test, removed_X_test, removed_Y_test \
-        = missing_vt_combinations_test(train, 2)
+    losses = []
 
-    # Train model
-    print('Training model with missing values')
-    model_with_missing_values = train_tuned_random_forest(remaining_X_test, remaining_y_test)
-    test_tuned_random_forst(model_with_missing_values , X_test, y_test)
+    for i in range(0, 10):
+        remaining_X_test, remaining_y_test, removed_X_test, removed_Y_test \
+            = missing_vt_combinations_test(train, 4)
 
-    print('Training model without missing values')
-    model_without_missing_values = train_tuned_random_forest(X_train, y_train)
-    test_tuned_random_forst(model_without_missing_values, X_test, y_test)
+        # Train model with missing values
+        model_with_missing_values = train_tuned_random_forest(remaining_X_test, remaining_y_test)
+        mae, mse, rmse, r2 = test_tuned_random_forest(model_with_missing_values, X_test, y_test)
+
+        # Train model with all data
+        model_without_missing_values = train_tuned_random_forest(X_train, y_train)
+        mae_without_missing_values, mse, rmse, r2 = test_tuned_random_forest(model_without_missing_values, X_test,
+                                                                             y_test)
+        # Loss off accuracy
+        loss = mae_without_missing_values - mae
+        losses.append(loss)
+
+    # Mean loss of accuracy
+    mean_loss = np.mean(losses)
+    print(f'Mean loss of accuracy: {mean_loss}')
+
+
+def missing_values_main_2(df, number_of_groups):
+    print('------- Missing values 2 test --------')
+
+    # Define grouping features
+    groups = df['die_opening']
+
+    # Create group k fold
+    gkf = GroupKFold(n_splits=number_of_groups)
+
+    # Get the data
+    X = df[['distance', 'thickness', 'die_opening']]
+    y = df['springback']
+
+    # pipe = Pipeline(
+    #     [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+    #                                                                min_samples_split=4, n_estimators=10))])
+
+    model = RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                  min_samples_split=4, n_estimators=10)
+
+    cv = GroupKFold(n_splits=number_of_groups)
+
+    # scores = cross_val_score(rfr, X, y=y, groups=groups, cv=GroupKFold(n_splits=3))
+    scores = cross_val_score(model, X, y, cv=cv, groups=groups)
+
+    print(f'Cross validation scores: {scores}')
+
+    # for i, (train_index, test_index) in enumerate(gkf.split(X, y, groups)):
+    #     X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+    #     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+    #
+    #     model = train_tuned_random_forest(X_train, y_train)
+    #     mae, mse, rmse, r2 = test_tuned_random_forest(model, X_test, y_test)
 
 
 def train_tuned_random_forest(X_train, y_train):
@@ -38,13 +85,14 @@ def train_tuned_random_forest(X_train, y_train):
     print(f'Number of training samples: {len(X_train)}')
     print(f'Number of testing samples: {len(X_test)}')
     print('-----')
+
     pipe = Pipeline(
         [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
-                                                                   max_depth=30, min_samples_leaf=2,
                                                                    min_samples_split=4, n_estimators=10))])
     sample = X_test.iloc[0]
     start = time.time()
-    pipe.fit(X_train, y_train)
+
+    pipe.fit(X_train.to_numpy(), y_train)
     stop = time.time()
     s = stop - start
     print(f"Training time: {s} s")
@@ -52,7 +100,7 @@ def train_tuned_random_forest(X_train, y_train):
     return pipe
 
 
-def test_tuned_random_forst(model, X_test, y_test):
+def test_tuned_random_forest(model, X_test, y_test):
     print('------- Testing tuned random forest --------')
     sample = X_test.iloc[0]
     start = time.time()
@@ -61,15 +109,15 @@ def test_tuned_random_forst(model, X_test, y_test):
     ms = (stop - start) * 1000
 
     print(f"Prediction time (runtime): {ms} ms")
-
     save_trained_model(model, 'tuned_random_forest')
 
     y_pred = model.predict(X_test)
-    print("MAE: {:.3f}".format(mean_absolute_error(y_test, y_pred)))
-    print("MSE: {:.3f}".format(mean_squared_error(y_test, y_pred)))
-    print("RMSE: {:.3f}".format(np.sqrt(mean_squared_error(y_test, y_pred))))
-    print("R2 score: {:.3f}".format(r2_score(y_test, y_pred)))
-    print('-----------------')
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, y_pred)
+
+    return mae, mse, rmse, r2
 
 
 # Save trained model to disk
@@ -94,7 +142,9 @@ if __name__ == '__main__':
     # Load data
     df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
 
-    X, y, X_train, y_train, X_test, y_test = non_random_split(df, train_split)
-    missing_values_main(X_train, y_train, X_test, y_test)
+    # X, y, X_train, y_train, X_test, y_test = non_random_split(df, train_split)
+    # missing_values_main(X_train, y_train, X_test, y_test)
+
+    missing_values_main_2(df, 5)
 
     print('Done!')

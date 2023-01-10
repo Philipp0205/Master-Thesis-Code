@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+from sklearn.model_selection import GroupKFold
+
 # Split the data into a training and testing set.
 # The functions split the data very specific like described in the thesis.
 # Out of the parameters range (V10-50 and t1-3) one V-set is removed and used as testing set.
@@ -77,7 +79,7 @@ def missing_vt_combinations_test(df, number_of_missing_values):
     remaining_y_train = remaining_data['springback']
 
     removed_X_train = removed_data[['distance', 'thickness', 'die_opening']]
-    removed_y_traint = removed_data['springback']
+    removed_y_train = removed_data['springback']
 
     return remaining_X_train, remaining_y_train, removed_X_train, removed_y_train
 
@@ -90,6 +92,24 @@ def missing_random_values_test(df, number_of_missing_values):
 
     return missing_data, remaining_data
 
+
+def group_k_fold_CV_test(df, model, number_of_groups):
+    X_trains, X_tests, y_trains, y_tests = [], [], [], []
+    print('------- Group K-Fold CV --------')
+    # Get the groups
+    groups = df['die_opening']
+
+    group_kfold = GroupKFold(n_splits=number_of_groups)
+
+    # Get the data
+    X = df[['distance', 'thickness', 'die_opening']]
+    y = df['springback']
+
+    for i, (train_index, test_index) in enumerate(group_kfold.split(X, y, groups)):
+        X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+
+    # Visualize cross validation behaviour
 
 # Plot the correlation matrix
 def correlations(df):
