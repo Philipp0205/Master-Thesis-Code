@@ -3,15 +3,17 @@ import os
 from pathlib import Path
 
 import matplotlib
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scienceplots
 
-import random
+
 
 from zyklen.models.distance_springback_diagram_model import DistanceSpringbackDiagramModel
 from zyklen.models.springback_model import SpringbackModel
+
+
+
 
 
 # Plots all springbacks into one distance-springback graph

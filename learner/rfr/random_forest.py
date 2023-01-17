@@ -203,18 +203,22 @@ def k_fold_CV(df, model):
         losses.append(loss)
 
     # save folds scores and losses as csv file
-    df = pd.DataFrame({'folds': all_folds, 'scores': mean_scores, 'losses': losses})
+    df = pd.DataFrame({'folds': all_folds, 'scores': mean_scores})
     df.to_csv('folds_scores.csv', index=False)
+
+    # save mean loss as csv file
+    df = pd.DataFrame({'losses': losses})
+    df.to_csv('losses.csv', index=False)
+
 
     # Get mean of all losses
     mean_loss = np.mean(losses)
 
     # Add mean loss as descriotion to plot
-    plt.title(f'Losses for different number of folds (mean loss = {mean_loss})')
+    plt.title(f'Losses for different number of folds')
 
-    # Plot loss for all folds
-    plt.plot(all_folds[1:], losses)
-    plt.plot(all_folds, mean_scores)
+    plt.plot(all_folds, mean_scores, label=f'average loss = {round(mean_loss, 4)}')
+    plt.legend()
     plt.xlabel('Number of folds')
     plt.ylabel('Mean RMSE')
 

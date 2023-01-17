@@ -2,9 +2,12 @@ import random
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pandas as pd
 
+from sklearn.model_selection import GroupKFold, train_test_split
 
-from sklearn.model_selection import GroupKFold
+from learner.model_data import ModelDataModel
+
 
 # Split the data into a training and testing set.
 # The functions split the data very specific like described in the thesis.
@@ -21,7 +24,7 @@ from sklearn.model_selection import GroupKFold
 # :param df: The dataframe to split
 # :param train_split: The die_opening which should be excluded from the training set
 def non_random_split(df, train_split):
-    correlations(df)
+    # correlations(df)
 
     print(f'Number of samples: {len(df.index)}')
 
@@ -35,7 +38,7 @@ def non_random_split(df, train_split):
     X_train = X[X['die_opening'] != train_split]
     y_train = y[X['die_opening'] != train_split]
 
-    return X, y, X_train, y_train, X_test, y_test
+    return ModelDataModel(X, y, X_train, y_train, X_test, y_test)
 
 
 # Measure the robustness of the model by removing a certain number of rows in the training dataset.
@@ -54,7 +57,8 @@ def missing_vt_combinations_test(df, number_of_missing_values):
         thickness_die_opening_combinations.append([row['thickness'], row['die_opening']])
 
     # Remove duplicates
-    thickness_die_opening_combinations = list(set(tuple(x) for x in thickness_die_opening_combinations))
+    thickness_die_opening_combinations = list(
+        set(tuple(x) for x in thickness_die_opening_combinations))
     number_of_combinations = len(thickness_die_opening_combinations)
 
     # Select two numbers between 0 and number_of_combinations
@@ -111,6 +115,7 @@ def group_k_fold_CV_test(df, model, number_of_groups):
 
     # Visualize cross validation behaviour
 
+
 # Plot the correlation matrix
 def correlations(df):
     print('Plotting Correlations')
@@ -122,3 +127,13 @@ def correlations(df):
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
     plt.savefig('results/correlation_matrix.png')
     plt.clf()
+
+
+def random_split(df):
+    X = df[['distance', 'thickness', 'die_opening']]
+    y = df['springback']
+
+    # Split the data into training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    return X, y, X_train, y_train, X_test, y_test
