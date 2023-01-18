@@ -15,6 +15,7 @@ def calculate_r2(model, X_test, y_test):
 
     return r2
 
+
 def relevance_report(model_data, model, y_pred):
     print('------- RELEVANCE REPORT --------')
     print(f'Model: {model.steps}\n')
@@ -26,4 +27,3 @@ def relevance_report(model_data, model, y_pred):
     print(f'Variance: {variance}')
 
     print('\n------- END RELEVANCE REPORT --------\n')
-

@@ -136,4 +136,4 @@ def random_split(df):
     # Split the data into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    return X, y, X_train, y_train, X_test, y_test
+    return ModelDataModel(X, y, X_train, y_train, X_test, y_test)

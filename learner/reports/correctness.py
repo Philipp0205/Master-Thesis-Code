@@ -9,7 +9,7 @@ def calculate_correctness(model, y_test, y_pred):
     return mae, mse, rmse
 
 
-def correctness_repot(model_data, model, y_pred):
+def correctness_report(model_data, model, y_pred):
     print('------- CORRECTNESS REPORT --------')
     print(f'Model: {model.steps}\n')
 

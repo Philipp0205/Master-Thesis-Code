@@ -1,13 +1,16 @@
 from pathlib import Path
 
+import numpy as np
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from learner.data_preprocessing import *
 # import GridSearchCV from sklearn
 from sklearn.model_selection import GridSearchCV
-from learner.reports.correctness import *
-from learner.reports.relevance import relevance_report
+from learner.reports import *
+from learner.reports.reports_main import create_reports
+from learner.reports.stability import stability_report
 
 
 def svr(df, X_train, y_train, X_test, y_test):
@@ -86,11 +89,15 @@ if __name__ == '__main__':
     # Load data
     df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
 
-    # Perform split data
+    # Split data
     md = non_random_split(df, 30)
+    md2 = random_split(df)
 
+    # Create model
     model, y_pred = svr(df, md.X_train, md.y_train, md.X_test, md.y_test)
-    # pipe = svr(df, X_train, y_train, X_test, y_test)
+    model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
 
-    correctness_report(md, model, y_pred)
-    relevance_report(md, model, y_pred)
+    # Create reports
+    reports = ['stability']
+    create_reports(reports, md, model, y_pred, )
+    create_reports(reports, md2, model2, y_pred2, )
