@@ -12,6 +12,8 @@ from learner.reports import *
 from learner.reports.reports_main import create_reports
 from learner.reports.stability import stability_report
 
+import pandas as pd
+
 
 def svr(df, X_train, y_train, X_test, y_test):
     # Best parameters: {'svr__C': 4000, 'svr__epsilon': 0.001, 'svr__gamma': 0.1,
@@ -98,6 +100,6 @@ if __name__ == '__main__':
     model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
 
     # Create reports
-    reports = ['stability']
+    reports = ['interpretability']
     create_reports(reports, md, model, y_pred, )
-    create_reports(reports, md2, model2, y_pred2, )
+    # create_reports(reports, md2, model2, y_pred2, )

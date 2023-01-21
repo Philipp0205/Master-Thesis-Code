@@ -1,5 +1,6 @@
 from learner.reports import *
 from learner.reports.correctness import correctness_report
+from learner.reports.interpretability import interpretability_report
 from learner.reports.relevance import relevance_report
 from learner.reports.stability import stability_report
 
@@ -13,5 +14,7 @@ def create_reports(names, md, model, y_pred):
             relevance_report(md, model, y_pred)
         elif name == 'stability':
             stability_report(md, model, y_pred)
+        elif name == 'interpretability':
+            interpretability_report(md, model, y_pred)
         else:
             print(f'Invalid report name: {name}')
