@@ -102,4 +102,3 @@ if __name__ == '__main__':
     # Create reports
     reports = ['interpretability']
     create_reports(reports, md, model, y_pred, )
-    # create_reports(reports, md2, model2, y_pred2, )
