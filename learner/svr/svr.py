@@ -101,4 +101,4 @@ if __name__ == '__main__':
 
     # Create reports
     reports = ['resource']
-    create_reports(reports, md, model, y_pred, )
+    create_reports(reports, md, model, y_pred)

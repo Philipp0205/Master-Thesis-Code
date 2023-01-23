@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.model_selection import GroupKFold, train_test_split
 
 from learner.model_data import ModelDataModel
+from misc import folders
 
 
 # Split the data into a training and testing set.
@@ -127,6 +128,12 @@ def correlations(df):
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
     plt.savefig('results/correlation_matrix.png')
     plt.clf()
+
+
+def get_data():
+    data_folder = folders.data_directory()
+
+    return pd.read_csv(data_folder / 'consolidated.csv', delimiter=',')
 
 
 def random_split(df):

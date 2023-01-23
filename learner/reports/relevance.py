@@ -20,10 +20,10 @@ def relevance_report(model_data, model, y_pred):
     print('------- RELEVANCE REPORT --------')
     print(f'Model: {model.steps}\n')
 
-    r2 = calculate_r2(model, model_data.X_test, model_data.y_test)
-    print(f'R2: {r2}')
-
     variance = variance_of_cv(model_data.X, model_data.y, model)
     print(f'Variance: {variance}')
+
+    r2 = calculate_r2(model, model_data.X_test, model_data.y_test)
+    print(f'R2: {r2}')
 
     print('\n------- END RELEVANCE REPORT --------\n')
