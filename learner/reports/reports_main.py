@@ -2,6 +2,7 @@ from learner.reports import *
 from learner.reports.correctness import correctness_report
 from learner.reports.interpretability import interpretability_report
 from learner.reports.relevance import relevance_report
+from learner.reports.robustness import robustness_report
 from learner.reports.stability import stability_report
 from learner.reports.resources import resource_report
 
@@ -19,5 +20,7 @@ def create_reports(names, md, model, y_pred):
             interpretability_report(md, model, y_pred)
         elif name == 'resource':
             resource_report(md, model, y_pred)
+        elif name == 'robustness':
+            robustness_report(md, model, y_pred)
         else:
             print(f'Invalid report name: {name}')

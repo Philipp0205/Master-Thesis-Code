@@ -69,20 +69,25 @@ def random_forest(X_train, y_train, X_test, y_test, train_split):
     y_pred_200 = reg_200.predict(X_test)
 
     # Create scatters for all predictions
-    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_1_tree', y_test, y_pred_1,
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_1_tree', y_test,
+                           y_pred_1,
                            'Random Forest 1 Tree',
                            train_split)
-    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_100_trees', y_test, y_pred_100,
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_100_trees', y_test,
+                           y_pred_100,
                            'Random Forest 100 Trees', train_split)
-    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_200_trees', y_test, y_pred_200,
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression_200_trees', y_test,
+                           y_pred_200,
                            'Random Forest 200 Trees', train_split)
 
 
 def random_forest_default(X_train, y_train, X_test, y_test, train_split):
     # Create a random forest regressor
     # regressor = RandomForestRegressor(n_estimators=10, random_state=0, criterion='squared_error', oob_score=True)
-    regressor_default = RandomForestRegressor(random_state=0, criterion='squared_error', oob_score=True)
-    regressor_100 = RandomForestRegressor(random_state=0, criterion='squared_error', n_estimators=200)
+    regressor_default = RandomForestRegressor(random_state=0, criterion='squared_error',
+                                              oob_score=True)
+    regressor_100 = RandomForestRegressor(random_state=0, criterion='squared_error',
+                                          n_estimators=200)
 
     # Train the regressor
     regressor_default.fit(X_train, y_train)
@@ -118,16 +123,20 @@ def random_forest_default(X_train, y_train, X_test, y_test, train_split):
 
     params = regressor_default.get_params()
     description = f'Random Forest Default'
-    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression', y_test, y_pred, description, train_split)
+    create_predict_scatter('results/rfr_default/', 'Random_Forest_Regression', y_test, y_pred,
+                           description, train_split)
 
     description = f'Random Forest Tuned'
-    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED', y_test, y_pred2, description,
+    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED', y_test,
+                           y_pred2, description,
                            train_split)
 
-    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED2', y_test, y_pred3, description,
+    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED2', y_test,
+                           y_pred3, description,
                            train_split)
 
-    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED100', y_test, y_pred3, description,
+    create_predict_scatter('results/rfr_default/', 'Random Forest Regression TUNED100', y_test,
+                           y_pred3, description,
                            train_split)
 
 
@@ -196,7 +205,8 @@ def random_forest_ada_boost(X_train, y_train, X_test, y_test, train_split):
     params = adaboost.get_params()
     description = f'{params["n_estimators"]} estimators'
     # Create Scatter plot for the prediction
-    create_predict_scatter('results/rfr_boost/', 'Adaboost_Regression', y_test, y_pred, description, train_split)
+    create_predict_scatter('results/rfr_boost/', 'Adaboost_Regression', y_test, y_pred, description,
+                           train_split)
 
 
 def create_predict_scatter(output_path, name, y_test, y_pred, description, train_split):
@@ -216,8 +226,9 @@ def create_predict_scatter(output_path, name, y_test, y_pred, description, train
     plt.title(
         f"({description})",
         fontsize=8)
-    plt.suptitle(f'{name}, mse: {round(mse, 2)}, remse: {round(rmse, 2)}, train split: {train_split}',
-                 fontsize=8)
+    plt.suptitle(
+        f'{name}, mse: {round(mse, 2)}, remse: {round(rmse, 2)}, train split: {train_split}',
+        fontsize=8)
     plt.xlabel('RM')
     plt.ylabel('Price')
     plt.savefig(f'{output_path}{name}{train_split}_new.png')
@@ -333,9 +344,10 @@ def rfr_final_after_grid_search(name, X_train, y_train, X_test, y_test):
     print(f'Number of testing samples: {len(X_test)}')
     print('-----')
     pipe = Pipeline(
-        [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
-                                                                   max_depth=30, min_samples_leaf=2,
-                                                                   min_samples_split=4, n_estimators=10))])
+        [("scaler", MinMaxScaler()),
+         ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                       max_depth=30, min_samples_leaf=2,
+                                       min_samples_split=4, n_estimators=10))])
     sample = X_test.iloc[0]
     start = time.time()
     pipe.fit(X_train, y_train)
@@ -372,9 +384,10 @@ def calculate_variance_of_cross_validation(X, y, model):
 
 def leave_one_out_cross_validation(X, y):
     pipe = Pipeline(
-        [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
-                                                                   max_depth=30, min_samples_leaf=2,
-                                                                   min_samples_split=4, n_estimators=10))])
+        [("scaler", MinMaxScaler()),
+         ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                       max_depth=30, min_samples_leaf=2,
+                                       min_samples_split=4, n_estimators=10))])
 
     scores = []
 
@@ -427,7 +440,8 @@ def missing_values(df, number_of_missing_values):
         thickness_die_opening_combinations.append([row['thickness'], row['die_opening']])
 
     # Remove duplicates
-    thickness_die_opening_combinations = list(set(tuple(x) for x in thickness_die_opening_combinations))
+    thickness_die_opening_combinations = list(
+        set(tuple(x) for x in thickness_die_opening_combinations))
     number_of_combinations = len(thickness_die_opening_combinations)
 
     # Select two numbers between 0 and number_of_combinations

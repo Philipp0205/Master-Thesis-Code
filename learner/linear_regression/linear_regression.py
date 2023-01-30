@@ -35,6 +35,6 @@ if __name__ == '__main__':
     model, y_pred = create_linear_regression_model(model_data)
     model2, y_pred2 = create_linear_regression_model(model_data2)
 
-    reports = ['resource']
+    reports = ['robustness']
     create_reports(reports, model_data, model, y_pred)
     # create_reports(reports, model_data2, model2, y_pred2)

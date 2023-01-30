@@ -100,5 +100,5 @@ if __name__ == '__main__':
     model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
 
     # Create reports
-    reports = ['resource']
+    reports = ['robustness']
     create_reports(reports, md, model, y_pred)

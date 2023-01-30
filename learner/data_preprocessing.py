@@ -1,4 +1,5 @@
 import random
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -134,6 +135,10 @@ def get_data():
     data_folder = folders.data_directory()
 
     return pd.read_csv(data_folder / 'consolidated.csv', delimiter=',')
+
+
+def root_directory():
+    return Path(__file__).parent.parent
 
 
 def random_split(df):
