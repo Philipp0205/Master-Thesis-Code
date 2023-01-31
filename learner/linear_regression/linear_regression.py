@@ -37,4 +37,5 @@ if __name__ == '__main__':
 
     reports = ['robustness']
     create_reports(reports, model_data, model, y_pred)
-    # create_reports(reports, model_data2, model2, y_pred2)
+
+    create_reports(reports, model_data2, model2, y_pred2)

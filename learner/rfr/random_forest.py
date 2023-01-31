@@ -19,6 +19,8 @@ from scipy import interpolate
 
 import pandas as pd
 
+from learner.reports.reports_main import create_reports
+
 
 # import leave one out cross validation
 # Entry function for the missing values test.
@@ -113,8 +115,9 @@ def train_tuned_random_forest(X_train, y_train, X_test, y_test):
     print('-----')
 
     pipe = Pipeline(
-        [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
-                                                                   min_samples_split=4, n_estimators=10))])
+        [("scaler", MinMaxScaler()),
+         ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                       min_samples_split=4, n_estimators=10))])
     sample = X_test.iloc[0]
     start = time.time()
 
@@ -126,12 +129,17 @@ def train_tuned_random_forest(X_train, y_train, X_test, y_test):
     return pipe
 
 
-def get_model():
+def random_forest(df, X_train, y_train, X_test, y_test):
     pipe = Pipeline(
-        [("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
-                                                                   min_samples_split=4, n_estimators=10))])
+        [("scaler", MinMaxScaler()),
+         ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+                                       min_samples_split=4, n_estimators=10))])
 
-    return pipe
+    pipe.fit(X_train, y_train)
+
+    y_pred = pipe.predict(X_test)
+
+    return pipe, y_pred
 
 
 def test_tuned_random_forest(model, X_test, y_test):
@@ -210,7 +218,6 @@ def k_fold_CV(df, model):
     df = pd.DataFrame({'losses': losses})
     df.to_csv('losses.csv', index=False)
 
-
     # Get mean of all losses
     mean_loss = np.mean(losses)
 
@@ -230,16 +237,27 @@ def get_project_root() -> Path:
 
 
 if __name__ == '__main__':
-    # Constants
-    train_split = 30
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
     # Load data
     df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
 
-    model = get_model()
+    # Split data
+    md = non_random_split(df, 30)
+    md2 = random_split(df)
 
-    k_fold_CV(df, model)
+    model, y_pred = random_forest(df, md.X_train, md.y_train, md.X_test, md.y_test)
+    model2, y_pred2 = random_forest(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
 
+    # Create model
+    reports = ['robustness']
+
+    print('--------')
+
+    print('NON-RANDOM SPLIT')
+    create_reports(reports, md, model, y_pred)
+
+    print('RANDOM SPLIT')
+    create_reports(reports, md2, model2, y_pred2)
     print('Done!')
