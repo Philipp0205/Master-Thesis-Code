@@ -40,7 +40,8 @@ def missing_vt_pairings(model_data, model):
 
         # Create new dataframe where with one column die opening and one column mse
         # Then sort by die opening
-        df_result = df_result.append({'die_opening': die_opening, 'mse': mse}, ignore_index=True)
+        df_result = df_result.concat({'die_opening': die_opening, 'mse': mse}, ignore_index=True)
+        # df_result = df_result.append({'die_opening': die_opening, 'mse': mse}, ignore_index=True)
 
     print('-----------------')
 
@@ -73,8 +74,9 @@ def missing_values(model_data, model):
 
         scores = cross_val_score(model, X, y, cv=cv, scoring='neg_root_mean_squared_error')
         folds = len(X) // number_of_folds
-        print(f'folds = {number_of_folds}')
-        print(f'Mean cross validation score: {scores.mean()}')
+
+        # print(f'folds = {number_of_folds}')
+        # print(f'Mean cross validation score: {scores.mean()}')
 
         # Make all scores positive
         scores = np.abs(scores)
@@ -82,7 +84,7 @@ def missing_values(model_data, model):
         mean_scores.append(scores.mean())
         all_folds.append(number_of_folds)
 
-        number_of_folds += 50
+        number_of_folds += 100
 
     # Calculate the loss for all folds
     for i in range(len(mean_scores) - 1):
@@ -109,6 +111,8 @@ def missing_values(model_data, model):
     plt.ylabel('Mean RMSE')
 
     plt.savefig('kfold.png', dpi=600)
+
+    return mean_loss
 
 
 def calculate_variance_of_cross_validation(X, y, model):
@@ -208,14 +212,21 @@ def create_noise_for_feature(df, feature_name):
 
 def robustness_report(model_data, model, y_pred):
     print('------- ROBUSTNESS REPORT --------')
-    df = missing_vt_pairings(model_data, model)
+    # df = missing_vt_pairings(model_data, model)
 
-    print(df)
+    # print(df)
 
     # Get mses from dataframe
-    mses = df['mse'].tolist()
+    # mses = df['mse'].tolist()
 
-    print('Average MSEs: ', sum(mses) / len(mses))
+    # print('Average MSEs: ', sum(mses) / len(mses))
 
     av_rmse = test_with_noise(model_data, model)
+    mean_loss = missing_values(model_data, model)
+
+    print('--------------')
+
+    print('Mean Loss with missing values: ', mean_loss)
     print('Average RMSE with noise: ', av_rmse)
+
+    print('\n------- END ROBUSTNESS REPORT --------\n')
