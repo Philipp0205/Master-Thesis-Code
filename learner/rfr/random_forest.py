@@ -212,7 +212,7 @@ def k_fold_CV(df, model):
 
     # save folds scores and losses as csv file
     df = pd.DataFrame({'folds': all_folds, 'scores': mean_scores})
-    df.to_csv('folds_scores.csv', index=False)
+    df.to_csv('SVM.csv', index=False)
 
     # save mean loss as csv file
     df = pd.DataFrame({'losses': losses})
@@ -229,7 +229,7 @@ def k_fold_CV(df, model):
     plt.xlabel('Number of folds')
     plt.ylabel('Mean RMSE')
 
-    plt.savefig('kfold.png', dpi=600)
+    plt.savefig('missing_values_svm.png', dpi=600)
 
 
 def get_project_root() -> Path:
@@ -258,6 +258,6 @@ if __name__ == '__main__':
     print('NON-RANDOM SPLIT')
     create_reports(reports, md, model, y_pred)
 
-    print('RANDOM SPLIT')
-    create_reports(reports, md2, model2, y_pred2)
-    print('Done!')
+    # print('RANDOM SPLIT')
+    # create_reports(reports, md2, model2, y_pred2)
+    # print('Done!')

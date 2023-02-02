@@ -1,9 +1,15 @@
+from os import listdir
+from os.path import isfile, join
+
 import numpy as np
+from joblib.numpy_pickle_utils import xrange
 from sklearn.model_selection import KFold, cross_val_score
 
 import learner.data_preprocessing as preprocessing
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from scipy import stats
 
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
@@ -51,11 +57,9 @@ def missing_vt_pairings(model_data, model):
     return df_result
 
 
-def missing_values(model_data, model):
+def missing_values(name, model_data, model):
     X = model_data.X
     y = model_data.y
-
-    model_name = type(model.steps[1][1]).__name__
 
     number_of_samples = len(X)
 
@@ -64,6 +68,7 @@ def missing_values(model_data, model):
     plt.style.use(['science', 'grid'])
 
     mean_scores = []
+    standard_errors = []
     all_folds = []
     losses = []
 
@@ -73,18 +78,21 @@ def missing_values(model_data, model):
         cv = KFold(number_of_folds)
 
         scores = cross_val_score(model, X, y, cv=cv, scoring='neg_root_mean_squared_error')
-        folds = len(X) // number_of_folds
-
-        # print(f'folds = {number_of_folds}')
-        # print(f'Mean cross validation score: {scores.mean()}')
 
         # Make all scores positive
-        scores = np.abs(scores)
+        # scores = np.abs(scores)
+
+        folds = len(X) // number_of_folds
+        standard_error = stats.sem(scores)
+
+        print(f'folds = {number_of_folds}')
+        print(f'Mean cross validation score: {scores.mean()}')
 
         mean_scores.append(scores.mean())
+        standard_errors.append(standard_error)
         all_folds.append(number_of_folds)
 
-        number_of_folds += 100
+        number_of_folds += 50
 
     # Calculate the loss for all folds
     for i in range(len(mean_scores) - 1):
@@ -92,25 +100,29 @@ def missing_values(model_data, model):
         losses.append(loss)
 
     # save folds scores and losses as csv file
-    df = pd.DataFrame({'folds': all_folds, 'scores': mean_scores})
-    df.to_csv('folds_scores.csv', index=False)
+    df = pd.DataFrame({'folds': all_folds, 'mean_rmse': mean_scores})
+    path = f'{preprocessing.root_directory()}/learner/reports/robustness/results/csv/'
+    df.to_csv(f'{path}{name}.csv', index=False)
 
     # save mean loss as csv file
     df = pd.DataFrame({'losses': losses})
-    df.to_csv('losses.csv', index=False)
+    # df.to_csv('losses.csv', index=False)
 
     # Get mean of all losses
     mean_loss = np.mean(losses)
 
     # Add mean loss as descriotion to plot
-    plt.title(f'Losses {model_name}')
+    plt.title(f'Losses {name}')
 
     plt.plot(all_folds, mean_scores, label=f'average loss = {round(mean_loss, 4)}')
     plt.legend()
     plt.xlabel(f'Number of folds')
     plt.ylabel('Mean RMSE')
 
-    plt.savefig('kfold.png', dpi=600)
+    path = f'{preprocessing.root_directory()}/learner/reports/robustness/results/'
+
+    plt.savefig(f'{path}missing_values_{name}.png', dpi=600)
+    plt.clf()
 
     return mean_loss
 
@@ -182,7 +194,7 @@ def test_with_noise(model_data, model):
     # Plot results
     plt.style.use(['science', 'grid'])
 
-    plt.plot(results['noise'], results['rmse'], label='RMSE')
+    # plt.plot(results['noise'], results['rmse'], label='RMSE')
 
     plt.legend()
 
@@ -210,7 +222,42 @@ def create_noise_for_feature(df, feature_name):
     return noise
 
 
-def robustness_report(model_data, model, y_pred):
+def plot_results(name):
+    root_dir = preprocessing.root_directory()
+    path = f'{root_dir}/learner/reports/robustness/results/csv/'
+
+    # ax = plt.subplot(111)
+
+    plt.style.use(['science', 'grid'])
+
+    # Get all csv file names in directory
+    files = [f for f in listdir(path) if isfile(join(path, f))]
+
+    for file_name in files:
+        # Read csv file
+        df = pd.read_csv(f'{path}{file_name}')
+
+        # Plot results
+        plt.plot(df['folds'], df['mean_rmse'], label=name)
+
+    # set x label for ax
+    # ax.set_xlabel('Number of folds')
+    # ax.set_ylabel('Mean RMSE')
+
+    plt.xlabel('Number of folds')
+    plt.ylabel('Mean RMSE')
+
+    plt.legend()
+
+    # ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),
+    #           ncol=3, fancybox=True, shadow=True)
+
+    plt.savefig(
+        f'{root_dir}/learner/reports/robustness/results/missing_values_consolidated.png',
+        dpi=600)
+
+
+def robustness_report(name, model_data, model, y_pred):
     print('------- ROBUSTNESS REPORT --------')
     # df = missing_vt_pairings(model_data, model)
 
@@ -222,7 +269,8 @@ def robustness_report(model_data, model, y_pred):
     # print('Average MSEs: ', sum(mses) / len(mses))
 
     av_rmse = test_with_noise(model_data, model)
-    mean_loss = missing_values(model_data, model)
+    mean_loss = missing_values(name, model_data, model)
+    plot_results(name)
 
     print('--------------')
 

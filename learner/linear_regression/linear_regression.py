@@ -12,7 +12,7 @@ import learner.data_preprocessing as preprocessing
 def create_linear_regression_model(model_data):
     lr_pipe = Pipeline([
         ('scaler', MinMaxScaler(feature_range=(0, 1))),
-        ('svr', LinearRegression())
+        ('support vector machine', LinearRegression())
     ])
 
     lr_pipe.fit(model_data.X_train, model_data.y_train)
@@ -38,4 +38,4 @@ if __name__ == '__main__':
     reports = ['robustness']
     create_reports(reports, model_data, model, y_pred)
 
-    create_reports(reports, model_data2, model2, y_pred2)
+    # create_reports(reports, model_data2, model2, y_pred2)
