@@ -591,6 +591,27 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/learner/linear_regression/losses.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/learner/reports/robustness/results/csv/robustness.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/learner/reports/robustness/results/missing_values_LinearRegression.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/learner/rfr/folds_scores.csv">
           <value>
             <Attribute>
@@ -606,6 +627,27 @@
           </value>
         </entry>
         <entry key="/learner/rfr/losses.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/learner/rfr/missing_values_RandomForestRegressor.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/learner/support vector machine/losses.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/learner/support vector machine/missing_values_svm.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
