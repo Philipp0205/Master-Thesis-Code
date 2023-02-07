@@ -18,7 +18,6 @@ def loo_cv(X, y, model):
 
 def stability_report(md, model, y_pred):
     print('------- STABILITY REPORT --------')
-    print(f'Model: {model.steps}\n')
 
     avg_error = loo_cv(md.X, md.y, model)
     print(f'LOOCV: {avg_error}')

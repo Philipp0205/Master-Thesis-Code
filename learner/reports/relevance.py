@@ -18,7 +18,6 @@ def calculate_r2(model, X_test, y_test):
 
 def relevance_report(model_data, model, y_pred):
     print('------- RELEVANCE REPORT --------')
-    print(f'Model: {model.steps}\n')
 
     variance = variance_of_cv(model_data.X, model_data.y, model)
     print(f'Variance: {variance}')
