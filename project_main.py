@@ -5,12 +5,13 @@ from learner.reports.reports_main import create_reports
 
 from zyklen.springback_summary_plot import consolidate_all_data_into_one_file
 
-
-
 if __name__ == '__main__':
-    # tra_input_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3/tra/'
-    # tra_output_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3/cleared/'
-    # springback_output_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3/results/'
+    # tra_input_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3
+    # /tra/'
+    # tra_output_directory = 'data/cycle_vs_single_test/single_measurements/messreihe_3
+    # /cleared/'
+    # springback_output_directory =
+    # 'data/cycle_vs_single_test/single_measurements/messreihe_3/results/'
 
     parent_folder = 'data/dataset/V50/'
 
@@ -26,5 +27,6 @@ if __name__ == '__main__':
     consolidate_all_data_into_one_file()
 
     # visualize_dataset()
+
 
     print('Done!')

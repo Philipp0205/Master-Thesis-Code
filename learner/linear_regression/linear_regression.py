@@ -17,7 +17,7 @@ import learner.data_preprocessing as preprocessing
 def linear_regression(model_data):
     lr_pipe = Pipeline([
         ('scaler', MinMaxScaler(feature_range=(0, 1))),
-        ('support vector machine', LinearRegression())
+        ('support_vector_machine', LinearRegression())
     ])
 
     lr_pipe.fit(model_data.X_train, model_data.y_train)
@@ -108,18 +108,19 @@ def pdp(X_train, y_train):
 if __name__ == '__main__':
     df = preprocessing.get_data()
     model_data = preprocessing.non_random_split(df, 30)
-    model_data2 = preprocessing.random_split(df)
+    model_data2 = preprocessing.non_random_split_with_validation(df, 30)
 
     # Create Linear Regression model
-    model, y_pred = linear_regression(model_data)
-    model2, y_pred2 = linear_regression(model_data2)
+    # model, y_pred = linear_regression(model_data)
+    model2, y_pred2 = linear_regression(model_data)
 
     # weigh_plot(df)
     # feature_importance(model_data.X_train, model_data.y_train)
     pdp(model_data.X_train, model_data.y_train)
 
-    # reports = ['robustness']
-    # create_reports(reports, model_data, model, y_pred)
+    name = "LR"
+
+    reports = ['correctness']
+    create_reports(name, reports, model_data2, model2, y_pred2)
 
     # create_reports(reports, model_data2, model2, y_pred2)
-

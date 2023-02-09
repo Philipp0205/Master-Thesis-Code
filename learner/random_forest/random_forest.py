@@ -18,7 +18,7 @@ import learner.data_preprocessing as preprocessing
 def random_forest(df, X_train, y_train, X_test, y_test):
     pipe = Pipeline(
         [("scaler", StandardScaler()),
-         ("rfr", RandomForestRegressor(bootstrap=True,
+         ("random_forest", RandomForestRegressor(bootstrap=True,
                                        criterion='absolute_error',
                                        min_samples_split=2,
                                        n_estimators=40,
@@ -96,20 +96,21 @@ def calculate_feature_importances(regressor, X_train):
 
 if __name__ == '__main__':
     df = preprocessing.get_data()
-    model_data = preprocessing.non_random_split(df, 30)
-    model_data2 = preprocessing.random_split(df)
+    # model_data = preprocessing.non_random_split(df, 30)
+    model_data2 = preprocessing.non_random_split_with_validation(df, 30)
 
     # Create Linear Regression model
-    model, y_pred = random_forest(model_data, model_data.X_train, model_data.y_train,
-                                  model_data.X_test, model_data.y_test)
+    # model, y_pred = random_forest(model_data, model_data.X_train, model_data.y_train,
+    #                               model_data.X_test, model_data.y_test)
+
     model2, y_pred2 = random_forest(model_data2, model_data2.X_train, model_data2.y_train,
                                     model_data2.X_test, model_data2.y_test)
 
     # grid_search(model)
     # calculate_feature_importances()feature_importances(model.steps[1][1], df)
-    calculate_feature_importances(model.steps[1][1], model_data.X_train)
+    # calculate_feature_importances(model.steps[1][1], model_data.X_train)
 
     name = 'RF'
     reports = ['correctness']
-    create_reports(name, reports, model_data, model, y_pred)
+    # create_reports(name, reports, model_data, model, y_pred)
     create_reports(name, reports, model_data2, model2, y_pred2)

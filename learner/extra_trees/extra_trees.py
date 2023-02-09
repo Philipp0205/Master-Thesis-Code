@@ -57,14 +57,17 @@ if __name__ == '__main__':
     df = preprocessing.get_data()
     model_data = preprocessing.non_random_split(df, 30)
     model_data2 = preprocessing.random_split(df)
+    model_data3 = preprocessing.non_random_split_with_validation(df, 30)
 
     # Create Linear Regression model
     model, y_pred = extra_trees(model_data)
     model2, y_pred2 = extra_trees(model_data2)
+    model3, y_pred3 = extra_trees(model_data2)
 
     # grid_search(model)
 
-    name = 'DT'
+    name = 'ET'
     reports = ['correctness']
-    create_reports(name, reports, model_data, model, y_pred)
-    create_reports(name, reports, model_data2, model2, y_pred2)
+    # create_reports(name, reports, model_data, model, y_pred)
+    # create_reports(name, reports, model_data2, model2, y_pred2)
+    create_reports(name, reports, model_data3, model3, y_pred3)

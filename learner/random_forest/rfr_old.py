@@ -287,7 +287,7 @@ def correlations(df):
 
 def preprocessing():
     # Create pipeline and scale the data
-    pipe = Pipeline([("scaler", MinMaxScaler()), ("rfr", RandomForestRegressor())])
+    pipe = Pipeline([("scaler", MinMaxScaler()), ("random_forest", RandomForestRegressor())])
 
     # Fit the pipeline
     # pipe.fit(X_train, y_train)
@@ -345,7 +345,7 @@ def rfr_final_after_grid_search(name, X_train, y_train, X_test, y_test):
     print('-----')
     pipe = Pipeline(
         [("scaler", MinMaxScaler()),
-         ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+         ("random_forest", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
                                        max_depth=30, min_samples_leaf=2,
                                        min_samples_split=4, n_estimators=10))])
     sample = X_test.iloc[0]
@@ -385,7 +385,7 @@ def calculate_variance_of_cross_validation(X, y, model):
 def leave_one_out_cross_validation(X, y):
     pipe = Pipeline(
         [("scaler", MinMaxScaler()),
-         ("rfr", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
+         ("random_forest", RandomForestRegressor(bootstrap=True, criterion='absolute_error',
                                        max_depth=30, min_samples_leaf=2,
                                        min_samples_split=4, n_estimators=10))])
 
@@ -425,7 +425,7 @@ def get_project_root() -> Path:
 # Save trained model to disk
 def save_trained_model(model, name):
     project_root = get_project_root()
-    output_directory = project_root / 'learner' / 'rfr' / 'saved_models'
+    output_directory = project_root / 'learner' / 'random_forest' / 'saved_models'
 
     with open(f'{output_directory}/{name}.model', 'wb') as f:
         pickle.dump(model, f)
