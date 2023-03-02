@@ -5,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 import learner.data_preprocessing as preprocessing
 
-from learner.reports.reports_main import create_reports
+from reports.reports_main import create_reports
 
 
 def logistic_regression(df, X_train, y_train, X_test, y_test):
@@ -20,7 +20,6 @@ def logistic_regression(df, X_train, y_train, X_test, y_test):
     X_test_transformed = lab.fit_transform(X_test)
 
     pipe.fit(X_train_transformed, y_train_transformed)
-
     y_pred = pipe.predict(X_test_transformed)
 
     return pipe, y_pred
@@ -30,7 +29,7 @@ if __name__ == '__main__':
     df = preprocessing.get_data()
 
     model_data = preprocessing.non_random_split(df, 30)
-    model_data2 = preprocessing.random_split(df)
+    model_data2 = preprocessing.random_split(df, 0.2)
 
     model, y_pred = logistic_regression(df, model_data.X_train,
                                         model_data.y_train,

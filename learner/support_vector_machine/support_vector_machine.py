@@ -1,6 +1,3 @@
-from pathlib import Path
-
-import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.svm import SVR
@@ -9,15 +6,8 @@ from sklearn.preprocessing import MinMaxScaler
 from learner.data_preprocessing import *
 # import GridSearchCV from sklearn
 from sklearn.model_selection import GridSearchCV
-from learner.reports import *
-from learner.reports.reports_main import create_reports
-from learner.reports.stability import stability_report
+from reports.reports_main import create_reports
 import learner.data_preprocessing as dp
-import scienceplots
-
-import learner.visualizing_results.visualizing_results as vr
-
-import pandas as pd
 
 
 def svr(df, X_train, y_train, X_test, y_test):
@@ -86,7 +76,6 @@ def grid_search(pipe, X_train, y_train, X_test, y_test):
     print("R2 score: {:.2f}".format(r2_score(y_test, grid.predict(X_test))))
     print("Best parameters: {}".format(grid.best_params_))
 
-
 def get_project_root() -> Path:
     return Path(__file__).parent.parent.parent
 
@@ -100,7 +89,7 @@ if __name__ == '__main__':
 
     # Split data
     md = non_random_split(df, 30)
-    md2 = random_split(df)
+    md2 = random_split(df, 0.3)
     md3 = non_random_split_with_validation(df, 30)
 
     # Create model
@@ -109,24 +98,25 @@ if __name__ == '__main__':
     model3, y_pred3 = svr(df, md3.X_train, md3.y_train, md3.X_test, md3.y_test)
 
     # predict_part_of_data(model, df)
-    df_result = vr.visualize_model_vs_example(model, df, 20, 3)
+    # df_result = vr.visualize_model_vs_example(model, df, 20, 3)
 
-    plt.plot(df_result['distance'], df_result['mean_springback'], label='Target',
-             marker='o',
-             markersize=2,
-             linestyle='solid')
-    plt.plot(df_result['distance'], df_result['pred_springback'], label='SVM', marker='o',
-             markersize=2,
-             linestyle='dotted')
+    # plt.plot(df_result['distance'], df_result['mean_springback'], label='Target',
+    #          marker='o',
+    #          markersize=2,
+    #          linestyle='solid')
+    # plt.plot(df_result['distance'], df_result['pred_springback'], label='SVM', marker='o',
+    #          markersize=2,
+    #          linestyle='dotted')
 
-    plt.legend()
-    plt.savefig('y_test2.png', dpi=600)
+    # plt.legend()
+    # plt.savefig('y_test2.png', dpi=600)
 
     # Create reports
-    reports = ['correctness']
+    reports = ['stability']
 
     name = "SVM"
-    print('NON RANDOM SPLIT')
+    create_reports(name, reports, md, model, y_pred)
+    # create_reports(name, reports, md2, model2, y_pred2)
     # create_reports(name, reports, md3, model3, y_pred3)
+
     # print('RANDOM SPLIT')
-    # create_reports(reports, md2, model2, y_pred2)

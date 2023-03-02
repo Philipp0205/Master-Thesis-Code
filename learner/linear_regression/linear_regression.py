@@ -5,12 +5,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_validate
 from sklearn.pipeline import Pipeline, make_pipeline
 from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures, StandardScaler
-import statsmodels.api as sm
-import scienceplots
 
-from learner.reports.reports_main import create_reports
+from reports.reports_main import create_reports
 
-import misc.folders as folders
 import learner.data_preprocessing as preprocessing
 
 
@@ -111,7 +108,7 @@ if __name__ == '__main__':
     model_data2 = preprocessing.non_random_split_with_validation(df, 30)
 
     # Create Linear Regression model
-    # model, y_pred = linear_regression(model_data)
+    model, y_pred = linear_regression(model_data)
     model2, y_pred2 = linear_regression(model_data)
 
     # weigh_plot(df)
@@ -120,7 +117,6 @@ if __name__ == '__main__':
 
     name = "LR"
 
-    reports = ['correctness']
+    reports = ['resource']
+    create_reports(name, reports, model_data, model, y_pred)
     create_reports(name, reports, model_data2, model2, y_pred2)
-
-    # create_reports(reports, model_data2, model2, y_pred2)

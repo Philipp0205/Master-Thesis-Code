@@ -1,9 +1,4 @@
-from io import StringIO
-
 import dtreeviz
-import numpy as np
-from sklearn import tree
-from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -13,7 +8,7 @@ from sklearn.tree import DecisionTreeRegressor
 import matplotlib.pyplot as plt
 
 import learner.data_preprocessing as preprocessing
-from learner.reports.reports_main import create_reports
+from reports.reports_main import create_reports
 
 
 def decision_tree(model_data):
@@ -123,25 +118,16 @@ def visualization_temp(df):
 if __name__ == '__main__':
     df = preprocessing.get_data()
     model_data = preprocessing.non_random_split(df, 30)
-    model_data2 = preprocessing.random_split(df)
-    model_data3 = preprocessing.non_random_split_with_validation(df, 30)
+    model_data2 = preprocessing.random_split(df, 0.3)
 
     # Create Linear Regression model
     model, y_pred = decision_tree(model_data)
     model2, y_pred2 = decision_tree(model_data2)
-    model3, y_pred3 = decision_tree(model_data3)
 
     # grid_search(model)
     feature_names = get_feature_names(df)
 
-    # Convert model_data.y_train to df
-    # visualize_tree(model.steps[1][1], model_data.X_train, model_data.y_train,
-    #                feature_names)
-
-    visualization_temp(df)
-
     name = 'DT'
-    reports = ['correctness']
-    # create_reports(name, reports, model_data, model, y_pred)
-    # create_reports(name, reports, model_data2, model2, y_pred2)
-    create_reports(name, reports, model_data3, model3, y_pred3)
+    reports = ['resource']
+    create_reports(name, reports, model_data, model, y_pred)
+    create_reports(name, reports, model_data2, model2, y_pred2)
