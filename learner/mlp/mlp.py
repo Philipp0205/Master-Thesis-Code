@@ -2,6 +2,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.inspection import PartialDependenceDisplay
 
 import learner.data_preprocessing as preprocessing
 from reports.reports_main import create_reports
@@ -46,6 +47,14 @@ def grid_search(pipe):
     # Print best hyper-parameters
     print('Best parameters: {}'.format(grid.best_params_))
 
+def partial_dependence(model, md):
+    features = ['distance', 'thickness', 'die_opening']
+    display = PartialDependenceDisplay.from_estimator(model, md.X, features)
+
+    # Save partial dependence plot
+    display.plot()
+    display.figure_.savefig('partial_dependence_mlp.png')
+
 
 if __name__ == '__main__':
     df = preprocessing.get_data()
@@ -65,8 +74,8 @@ if __name__ == '__main__':
 
     # grid_search(model)
 
-    name = "MLP"
+    partial_dependence(model, model_data)
 
-    reports = ['stability']
-    create_reports(name, reports, model_data, model, y_pred)
-    # create_reports(name, reports, model_data2, model2, y_pred2)
+    # name = "MLP"
+    # reports = ['stability']
+    # create_reports(name, reports, model_data, model, y_pred)

@@ -33,6 +33,36 @@ def random_forest(model_data):
     return pipe, y_pred
 
 
+def feature_importances1(rf_model, df):
+    plt.style.use(['science'])
+    importances = rf_model.feature_importances_
+    std = np.std([tree.feature_importances_ for tree in rf_model.estimators_], axis=0)
+
+    feature_names = df.columns
+    # Remove 'springback"
+    feature_names = feature_names.drop('springback')
+
+    forest_importances = pd.Series(importances, index=feature_names)
+
+    fig, ax = plt.subplots()
+    forest_importances.plot.bar(yerr=std, ax=ax)
+    ax.set_title("Feature importances using MDI")
+    ax.set_ylabel("Mean decrease in impurity")
+    # fig.tight_layout()
+    plt.savefig('rf_feature_importances.png', transparent=True, dpi=600)
+
+
+def lime(model, df, md):
+    X = md.X
+    y = md.y
+
+
+    categorical_features = np.argwhere(
+        np.array([len(set(df.iloc[:, x])) for x in range(df.shape[1])]) <= 10).flatten()
+
+    print(categorical_features)
+
+
 def grid_search(model, model_data):
     pipe = Pipeline(
         [("scaler", StandardScaler()),
@@ -43,7 +73,6 @@ def grid_search(model, model_data):
                                                  n_estimators=10,
                                                  max_depth=7,
                                                  ))])
-
 
     param_grid = {
         'random_forest__n_estimators': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
@@ -94,7 +123,7 @@ def calculate_feature_importances(regressor, X_train):
 
     # Create plot
     plt.figure(dpi=600)
-    plt.title("Feature Importance")
+    plt.title("Feature Importance1")
 
     # Add bars
     plt.bar(range(X_train.shape[1]), importances[indices])
@@ -122,7 +151,10 @@ if __name__ == '__main__':
     # calculate_feature_importances()feature_importances(model.steps[1][1], df)
     # calculate_feature_importances(model.steps[1][1], model_data.X_train)
 
+    # feature_importances1(model.steps[1][1], df)
+    lime(model, df, model_data)
+
     name = 'RF'
-    reports = ['stability']
-    create_reports(name, reports, model_data, model, y_pred)
+    # reports = ['stability']
+    # create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)

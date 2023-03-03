@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.inspection import PartialDependenceDisplay
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
@@ -76,6 +77,17 @@ def grid_search(pipe, X_train, y_train, X_test, y_test):
     print("R2 score: {:.2f}".format(r2_score(y_test, grid.predict(X_test))))
     print("Best parameters: {}".format(grid.best_params_))
 
+
+def partial_dependence_plot(model, df):
+    plt.style.use(['science', 'ieee'])
+    features = ['distance', 'thickness', 'die_opening']
+    display = PartialDependenceDisplay.from_estimator(model, md.X, features)
+
+    # Save partial dependence plot
+    display.plot()
+    display.figure_.savefig('partial_dependence_svm.png', transparent=True, dpi=600)
+
+
 def get_project_root() -> Path:
     return Path(__file__).parent.parent.parent
 
@@ -97,26 +109,11 @@ if __name__ == '__main__':
     model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
     model3, y_pred3 = svr(df, md3.X_train, md3.y_train, md3.X_test, md3.y_test)
 
-    # predict_part_of_data(model, df)
-    # df_result = vr.visualize_model_vs_example(model, df, 20, 3)
-
-    # plt.plot(df_result['distance'], df_result['mean_springback'], label='Target',
-    #          marker='o',
-    #          markersize=2,
-    #          linestyle='solid')
-    # plt.plot(df_result['distance'], df_result['pred_springback'], label='SVM', marker='o',
-    #          markersize=2,
-    #          linestyle='dotted')
-
-    # plt.legend()
-    # plt.savefig('y_test2.png', dpi=600)
-
     # Create reports
     reports = ['stability']
 
-    name = "SVM"
-    create_reports(name, reports, md, model, y_pred)
-    # create_reports(name, reports, md2, model2, y_pred2)
-    # create_reports(name, reports, md3, model3, y_pred3)
+    partial_dependence_plot(model, df)
 
-    # print('RANDOM SPLIT')
+    # name = "SVM"
+    # create_reports(name, reports, md, model, y_pred)
+
