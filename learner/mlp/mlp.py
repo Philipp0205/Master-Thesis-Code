@@ -75,7 +75,7 @@ if __name__ == '__main__':
     # grid_search(model)
 
     partial_dependence(model, model_data)
+    name = "MLP"
 
-    # name = "MLP"
     # reports = ['stability']
     # create_reports(name, reports, model_data, model, y_pred)

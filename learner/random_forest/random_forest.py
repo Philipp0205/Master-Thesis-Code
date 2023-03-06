@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 
 from reports.reports_main import create_reports
 import learner.data_preprocessing as preprocessing
+import learner.visualizing_results.lime as lime
 
 
 def random_forest(model_data):
@@ -52,15 +53,6 @@ def feature_importances1(rf_model, df):
     plt.savefig('rf_feature_importances.png', transparent=True, dpi=600)
 
 
-def lime(model, df, md):
-    X = md.X
-    y = md.y
-
-
-    categorical_features = np.argwhere(
-        np.array([len(set(df.iloc[:, x])) for x in range(df.shape[1])]) <= 10).flatten()
-
-    print(categorical_features)
 
 
 def grid_search(model, model_data):
@@ -152,9 +144,10 @@ if __name__ == '__main__':
     # calculate_feature_importances(model.steps[1][1], model_data.X_train)
 
     # feature_importances1(model.steps[1][1], df)
-    lime(model, df, model_data)
 
     name = 'RF'
+    # lime.create_lime_explanation(name, model, df, model_data)
+    lime.create_lime_subplot(model_data)
     # reports = ['stability']
     # create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)
