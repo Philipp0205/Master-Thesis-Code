@@ -5,10 +5,10 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.inspection import PartialDependenceDisplay
 
 import learner.data_preprocessing as preprocessing
-from reports.reports_main import create_reports
+from learner.visualizing_results.global_model_agnostic_methods import *
 
 
-def mlp(X_train, y_train, X_test, y_test):
+def mlp(md):
     # Best parameters: {'mlp__activation': 'tanh', 'mlp__alpha': 0.05,
     # 'mlp__hidden_layer_sizes':
     # (100, 100), 'mlp__learning_rate': 'constant', 'mlp__max_iter': 500,
@@ -25,8 +25,8 @@ def mlp(X_train, y_train, X_test, y_test):
                              learning_rate='constant',
                              ))])
 
-    pipe.fit(X_train, y_train)
-    y_pred = pipe.predict(X_test)
+    pipe.fit(md.X_train, md.y_train)
+    y_pred = pipe.predict(md.X_test)
 
     return pipe, y_pred
 
@@ -47,14 +47,6 @@ def grid_search(pipe):
     # Print best hyper-parameters
     print('Best parameters: {}'.format(grid.best_params_))
 
-def partial_dependence(model, md):
-    features = ['distance', 'thickness', 'die_opening']
-    display = PartialDependenceDisplay.from_estimator(model, md.X, features)
-
-    # Save partial dependence plot
-    display.plot()
-    display.figure_.savefig('partial_dependence_mlp.png')
-
 
 if __name__ == '__main__':
     df = preprocessing.get_data()
@@ -62,20 +54,16 @@ if __name__ == '__main__':
     model_data = preprocessing.non_random_split(df, 30)
     model_data2 = preprocessing.random_split(df, 0.3)
 
-    model, y_pred = mlp(model_data.X_train,
-                        model_data.y_train,
-                        model_data.X_test,
-                        model_data.y_test)
+    model, y_pred = mlp(model_data)
 
-    model2, y_pred2 = mlp(model_data2.X_train,
-                          model_data2.y_train,
-                          model_data2.X_test,
-                          model_data2.y_test)
+    name = "MLP"
+    feature_names = df.columns
+    # drop springback
+    feature_names = feature_names.drop('springback').to_numpy()
 
-    # grid_search(model)
+    # partial_dependence_plot(model, model_data, feature_names, name)
+    # feature_importance(model, df, name)
+    feature_imprtance_yellowbrick(model, model_data)
 
-    partial_dependence(model, model_data)
-
-    # name = "MLP"
     # reports = ['stability']
     # create_reports(name, reports, model_data, model, y_pred)

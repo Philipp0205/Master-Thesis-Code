@@ -53,7 +53,7 @@ def iterate_through_folder_and_convert_tra_to_csv(input_folder):
 
 
 if __name__ == '__main__':
-    root_dir = pp.root_directory()
+    root_dir = pp.get_root_directory()
     input_folder = f'{root_dir}/data/dataset/dip_test/'
 
     iterate_through_folder_and_convert_tra_to_csv(input_folder)

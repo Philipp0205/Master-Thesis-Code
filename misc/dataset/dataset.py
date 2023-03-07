@@ -81,7 +81,7 @@ def visualize_dataset():
     plt.xlabel('Thickness $t$ [mm]')
     plt.ylabel('Die opening $V$ [mm]')
 
-    root = preprocessing.root_directory()
+    root = preprocessing.get_root_directory()
 
     plt.savefig('results/test_train_split1.png', transparent=True)
 

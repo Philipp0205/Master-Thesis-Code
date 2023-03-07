@@ -9,6 +9,7 @@ from learner.data_preprocessing import *
 from sklearn.model_selection import GridSearchCV
 from reports.reports_main import create_reports
 import learner.data_preprocessing as dp
+from learner.visualizing_results.global_model_agnostic_methods import *
 
 
 def svr(df, X_train, y_train, X_test, y_test):
@@ -78,16 +79,6 @@ def grid_search(pipe, X_train, y_train, X_test, y_test):
     print("Best parameters: {}".format(grid.best_params_))
 
 
-def partial_dependence_plot(model, df):
-    plt.style.use(['science', 'ieee'])
-    features = ['distance', 'thickness', 'die_opening']
-    display = PartialDependenceDisplay.from_estimator(model, md.X, features)
-
-    # Save partial dependence plot
-    display.plot()
-    display.figure_.savefig('partial_dependence_svm.png', transparent=True, dpi=600)
-
-
 def get_project_root() -> Path:
     return Path(__file__).parent.parent.parent
 
@@ -112,8 +103,14 @@ if __name__ == '__main__':
     # Create reports
     reports = ['stability']
 
-    partial_dependence_plot(model, df)
+    name = "SVM"
+    feature_names = df.columns
+    # remove target variable
+    feature_names = feature_names.drop('springback').to_numpy()
 
-    # name = "SVM"
+    # partial_dependence_plot(model, md, feature_names, name)
+    model = model.named_steps['support_vector_machine']
+    feature_importance_plot(model, df, name)
+
+
     # create_reports(name, reports, md, model, y_pred)
-

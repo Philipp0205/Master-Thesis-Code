@@ -41,7 +41,7 @@ def performance_test_train_val(model, model_data):
 
 
 def performance_plot(df):
-    root = pre.root_directory()
+    root = pre.get_root_directory()
 
     # Create plot for each row in df with the columns 'name' and 'train', 'test', 'val'
     # and the rows 'rmse', 'mae', 'mse', 'r2'.
@@ -96,7 +96,7 @@ def correctness_report(name, model_data, model, y_pred):
     #     {'name': name, 'train': rmse_train, 'test': rmse_test, 'val': rmse_val},
     #     index=[0])])
 
-    root = pre.root_directory()
+    root = pre.get_root_directory()
 
     # Get csv as dataframe
     # df = pd.read_csv(f'{root}/learner/reports/correctness/correctness_report.csv')
