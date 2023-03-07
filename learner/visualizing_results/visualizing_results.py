@@ -1,5 +1,8 @@
+import os
+
 import numpy as np
 import pandas as pd
+from sklearn.inspection import PartialDependenceDisplay
 
 import learner.data_preprocessing as dp
 import matplotlib.pyplot as plt
@@ -8,6 +11,8 @@ import learner.support_vector_machine.support_vector_machine as svm
 import learner.random_forest.random_forest as rfr
 import learner.extra_trees.extra_trees as etr
 import learner.linear_regression.linear_regression as lr
+import learner.mlp.mlp as mlp
+import learner.data_preprocessing as dp
 
 import learner.data_preprocessing as dp
 
@@ -108,6 +113,7 @@ def visualize_mean_spring_backs(df):
 def visualize_model_vs_example(model, df, die_opening, thickness):
     plt.style.use(['science', 'grid', 'ieee'])
 
+    # Get all data where die opening and and thicknesses are equal to the current
     df_part = df.loc[(df['die_opening'] == die_opening) & (df['thickness'] == thickness)]
 
     # Sort df_test by distance
@@ -116,8 +122,7 @@ def visualize_model_vs_example(model, df, die_opening, thickness):
     X_test = df_part.drop(['springback'], axis=1)
     y_test = df_part['springback']
 
-    # data = dp.non_random_split(df, 30)
-    data = dp.random_split(df)
+    data = dp.non_random_split(df, 30)
 
     #  Merge data.X_train and data.y_train
     df_train = pd.concat([data.X_train, data.y_train], axis=1)
@@ -174,32 +179,38 @@ def visualize_all_results_for_example(die_opening, thickness):
     et_model, y_pred = etr.extra_trees(md)
     df_result_et = visualize_model_vs_example(et_model, df, die_opening, thickness)
 
-    lr_model, y_pred = lr.linear_regression(md)
-    df_result_lr = visualize_model_vs_example(lr_model, df, die_opening, thickness)
+    mlp_model, y_pred = mlp.mlp(md)
+    df_result_mlp = visualize_model_vs_example(mlp_model, df, die_opening, thickness)
 
     plt.plot(df_result_svm['distance'], df_result_svm['mean_springback'], label='Target',
              marker='o',
+             color='black',
              markersize=2,
              linestyle='solid')
+
     plt.plot(df_result_svm['distance'], df_result_svm['pred_springback'], label='SVM',
              marker='o',
              markersize=2,
+             color='red',
              linestyle='dotted')
+
     plt.plot(df_result_rf['distance'], df_result_rf['pred_springback'], label='RF',
              marker='o',
              markersize=2,
+             color='blue',
              linestyle='dotted')
 
     plt.plot(df_result_et['distance'], df_result_et['pred_springback'], label='ET',
              marker='o',
              markersize=2,
+             color='green',
              linestyle='dotted')
 
-    # plt.plot(df_result_lr['distance'], df_result_lr['pred_springback'], label='LR',
-    #             marker='o',
-    #             markersize=2,
-    #             linestyle='dotted')
-
+    plt.plot(df_result_mlp['distance'], df_result_mlp['pred_springback'], label='MLP',
+             marker='o',
+             markersize=2,
+             color='purple',
+             linestyle='dotted')
 
     plt.legend()
     plt.xlabel('$y_p$')
@@ -207,6 +218,8 @@ def visualize_all_results_for_example(die_opening, thickness):
     plt.savefig(f'performance_{die_opening}_{thickness}.png', dpi=600, transparent=True)
 
     plt.clf()
+
+
 
 
 if __name__ == '__main__':
@@ -219,9 +232,10 @@ if __name__ == '__main__':
     # \item V30, t1.5 (15)
     # \item V50 t0.5 (100)
 
-    visualize_all_results_for_example(20, 3)
-    visualize_all_results_for_example(20, 1)
-    visualize_all_results_for_example(30, 1.5)
-    visualize_all_results_for_example(30, 2.0)
+    # visualize_all_results_for_example(20, 3)
+    # visualize_all_results_for_example(20, 1)
+    # visualize_all_results_for_example(30, 2)
+    # visualize_all_results_for_example(30, 1.5)
+    # visualize_all_results_for_example(30, 2.0)
     visualize_all_results_for_example(50, 0.5)
     visualize_all_results_for_example(50, 1)

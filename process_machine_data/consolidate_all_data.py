@@ -28,6 +28,6 @@ def consolidate_all_data_into_one_file(output_directory):
 
 
 if __name__ == '__main__':
-    root_directory = pp.root_directory()
+    root_directory = pp.get_root_directory()
     output_directory = f'{root_directory}/data/dataset'
     consolidate_all_data_into_one_file(output_directory)

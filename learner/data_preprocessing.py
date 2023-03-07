@@ -162,7 +162,7 @@ def non_random_split_with_validation(df, train_split):
                           model_data.y_test, X_val, y_val)
 
 
-def root_directory():
+def get_root_directory():
     return Path(__file__).parent.parent
 
 

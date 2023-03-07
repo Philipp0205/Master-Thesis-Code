@@ -60,7 +60,7 @@ def create_lime_explanation(name, model, df, md):
     exp = explainer.explain_instance(instance, predict_fn_rf, num_features=10)
     plt.style.use(['science', 'ieee'])
 
-    root = preprocessing.root_directory()
+    root = preprocessing.get_root_directory()
     fig = exp.as_pyplot_figure()
     fig.savefig(f'{root}/learner/visualizing_results/results/lime/lime_{name}_pyplot.png')
     exp.save_to_file(f'{root}/learner/visualizing_results/results/lime/lime_{name}.html')

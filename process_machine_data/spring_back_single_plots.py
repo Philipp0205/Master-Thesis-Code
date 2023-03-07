@@ -176,7 +176,7 @@ def plot_time_force(df):
 
 
 if __name__ == '__main__':
-    root_directory = pp.root_directory()
+    root_directory = pp.get_root_directory()
 
     data_directory = f'{root_directory}/data/dataset/dip_test/'
     output_directory = f'{data_directory}results/'

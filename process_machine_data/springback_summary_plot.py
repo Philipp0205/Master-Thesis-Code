@@ -320,7 +320,7 @@ def consolidate_all_data_into_one_file():
 
 
 if __name__ == '__main__':
-    root_directory = pp.root_directory()
+    root_directory = pp.get_root_directory()
 
     data_directory = f'{root_directory}/data/dataset/V30/'
     output_directory = f'{data_directory}results/'

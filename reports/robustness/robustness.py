@@ -105,7 +105,7 @@ def missing_values(name, model_data, model):
 
     # save folds scores and losses as csv file
     df = pd.DataFrame({'folds': all_folds, 'mean_rmse': mean_scores})
-    path = f'{pp.root_directory()}/learner/reports/robustness/results/csv/'
+    path = f'{pp.get_root_directory()}/learner/reports/robustness/results/csv/'
     df.to_csv(f'{path}{name}.csv', index=False)
 
     # save mean loss as csv file
@@ -123,7 +123,7 @@ def missing_values(name, model_data, model):
     plt.xlabel(f'Number of folds')
     plt.ylabel('Mean RMSE')
 
-    path = f'{pp.root_directory()}/learner/reports/robustness/results/'
+    path = f'{pp.get_root_directory()}/learner/reports/robustness/results/'
 
     plt.savefig(f'{path}missing_values_{name}.png', dpi=600)
     plt.clf()
@@ -139,7 +139,7 @@ def calculate_variance_of_cross_validation(X, y, model):
 
 
 def test_for_different_test_train_split(df, model, name):
-    root = dp.root_directory()
+    root = dp.get_root_directory()
     path = f'{root}/reports/robustness/results/csv/'
 
     # Read missing_values.csv file
@@ -312,7 +312,7 @@ def create_noise_for_feature(df, feature_name):
 
 
 def plot_results(name):
-    root_dir = pp.root_directory()
+    root_dir = pp.get_root_directory()
     path = f'{root_dir}/reports/robustness/results/csv/'
 
     # ax = plt.subplot(111)
@@ -347,7 +347,7 @@ def plot_results(name):
 
 
 def variance_missing_values(model_data, model):
-    root = dp.root_directory()
+    root = dp.get_root_directory()
     path = f'{root}/reports/robustness/results/csv/'
 
     # Read missing_values.csv file

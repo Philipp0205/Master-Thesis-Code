@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.inspection import permutation_importance
 from sklearn.model_selection import GridSearchCV
 
 from learner.data_preprocessing import *
@@ -9,7 +10,6 @@ from sklearn.ensemble import RandomForestRegressor
 
 from reports.reports_main import create_reports
 import learner.data_preprocessing as preprocessing
-import learner.visualizing_results.lime as lime
 
 
 def random_forest(model_data):
@@ -51,8 +51,6 @@ def feature_importances1(rf_model, df):
     ax.set_ylabel("Mean decrease in impurity")
     # fig.tight_layout()
     plt.savefig('rf_feature_importances.png', transparent=True, dpi=600)
-
-
 
 
 def grid_search(model, model_data):
@@ -128,6 +126,38 @@ def calculate_feature_importances(regressor, X_train):
     plt.clf()
 
 
+def permuation_feature_importance(model, md, df):
+    scoring = ['r2', 'neg_mean_absolute_percentage_error', 'neg_mean_squared_error']
+
+    r = permutation_importance(model, md.X_test, md.y_test,
+                               n_repeats=30,
+                               random_state=0)
+
+    r_multi = permutation_importance(model, md.X_test, md.y_test,
+                                     n_repeats=30,
+                                     random_state=0,
+                                     scoring=scoring)
+
+    feature_names = df.columns.to_numpy()
+    feature_names = feature_names[feature_names != 'springback']
+
+    # Iterate over each metric r_multi and print the feature name and its importance
+    for metric in r_multi:
+        print(f"{metric}")
+        r = r_multi[metric]
+        for i in r.importances_mean.argsort()[::-1]:
+            print(f" {feature_names[i]:<8}"
+                  f" {r.importances_mean[i]:.3f}"
+                  f" +/-  {r.importances_std[i]:.3f}")
+
+
+    # iterate over the features in the model and print the feature name and its importance
+    # for i in r.importances_mean.argsort()[::-1]:
+    #     print(f" {feature_names[i]:<8}"
+    #           f" {r.importances_mean[i]:.3f}"
+    #           f" +/-  {r.importances_std[i]:.3f}")
+
+
 if __name__ == '__main__':
     df = preprocessing.get_data()
     model_data = preprocessing.non_random_split(df, 30)
@@ -136,6 +166,8 @@ if __name__ == '__main__':
 
     model, y_pred = random_forest(model_data)
     model2, y_pred2 = random_forest(model_data2)
+
+    permuation_feature_importance(model, model_data, df)
 
     # grid_search(model, model_data)
 
@@ -147,7 +179,7 @@ if __name__ == '__main__':
 
     name = 'RF'
     # lime.create_lime_explanation(name, model, df, model_data)
-    lime.create_lime_subplot(model_data)
+    # lime.create_lime_subplot(model_data)
     # reports = ['stability']
     # create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # springback_output_directory =
     # 'data/cycle_vs_single_test/single_measurements/messreihe_3/results/'
 
-    root = dp.root_directory()
+    root = dp.get_root_directory()
     dataset_folder = f'{root}/data/dataset/'
 
     parent_folder = f'{root}/dip_test/'
