@@ -61,9 +61,9 @@ if __name__ == '__main__':
     # drop springback
     feature_names = feature_names.drop('springback').to_numpy()
 
-    # partial_dependence_plot(model, model_data, feature_names, name)
+    partial_dependence_plot(model, model_data, feature_names, name)
     # feature_importance(model, df, name)
-    feature_imprtance_yellowbrick(model, model_data)
+    # permutation_feature_importance(model, model_data, df)
 
     # reports = ['stability']
     # create_reports(name, reports, model_data, model, y_pred)

@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.inspection import permutation_importance
 from sklearn.model_selection import GridSearchCV
 
 from learner.data_preprocessing import *
@@ -7,6 +6,8 @@ from learner.data_preprocessing import *
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
+
+from learner.visualizing_results.global_model_agnostic_methods import *
 
 from reports.reports_main import create_reports
 import learner.data_preprocessing as preprocessing
@@ -126,38 +127,6 @@ def calculate_feature_importances(regressor, X_train):
     plt.clf()
 
 
-def permuation_feature_importance(model, md, df):
-    scoring = ['r2', 'neg_mean_absolute_percentage_error', 'neg_mean_squared_error']
-
-    r = permutation_importance(model, md.X_test, md.y_test,
-                               n_repeats=30,
-                               random_state=0)
-
-    r_multi = permutation_importance(model, md.X_test, md.y_test,
-                                     n_repeats=30,
-                                     random_state=0,
-                                     scoring=scoring)
-
-    feature_names = df.columns.to_numpy()
-    feature_names = feature_names[feature_names != 'springback']
-
-    # Iterate over each metric r_multi and print the feature name and its importance
-    for metric in r_multi:
-        print(f"{metric}")
-        r = r_multi[metric]
-        for i in r.importances_mean.argsort()[::-1]:
-            print(f" {feature_names[i]:<8}"
-                  f" {r.importances_mean[i]:.3f}"
-                  f" +/-  {r.importances_std[i]:.3f}")
-
-
-    # iterate over the features in the model and print the feature name and its importance
-    # for i in r.importances_mean.argsort()[::-1]:
-    #     print(f" {feature_names[i]:<8}"
-    #           f" {r.importances_mean[i]:.3f}"
-    #           f" +/-  {r.importances_std[i]:.3f}")
-
-
 if __name__ == '__main__':
     df = preprocessing.get_data()
     model_data = preprocessing.non_random_split(df, 30)
@@ -167,7 +136,7 @@ if __name__ == '__main__':
     model, y_pred = random_forest(model_data)
     model2, y_pred2 = random_forest(model_data2)
 
-    permuation_feature_importance(model, model_data, df)
+    permutation_feature_importance(model, model_data, df)
 
     # grid_search(model, model_data)
 

@@ -1,9 +1,9 @@
-import numpy as np
+from sklearn.compose import ColumnTransformer
 from sklearn.inspection import PartialDependenceDisplay
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from learner.data_preprocessing import *
 # import GridSearchCV from sklearn
 from sklearn.model_selection import GridSearchCV
@@ -13,28 +13,28 @@ from learner.visualizing_results.global_model_agnostic_methods import *
 
 
 def svr(df, X_train, y_train, X_test, y_test):
-    # Best parameters: {'svr__C': 4000, 'svr__epsilon': 0.001, 'svr__gamma': 0.1,
-    # 'svr__kernel': 'rbf'}
-    svr_pipe = Pipeline([
+    # pipe = Pipeline([
+    #     ('scaler', StandardScaler()),
+    #     ('support_vector_machine',
+    #      SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1))
+    # ])
+    #
+    pipe = Pipeline([
         ('scaler', MinMaxScaler(feature_range=(0, 1))),
-        ('support_vector_machine',
-         SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1))
-    ])
+        ('mlp', SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1
+                    ))])
 
-    svr_pipe_without_scaling = Pipeline([
-        ('support_vector_machine',
-         SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1))
-    ])
+    feature_names = X_train.columns
 
-    # Fit the models
-    svr_pipe.fit(X_train, y_train)
-    svr_pipe_without_scaling.fit(X_train, y_train)
+    model = SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1)
+    pipe.fit(X_train, y_train)
 
+    model.fit(X_train, y_train)
     # Predict the test set
-    y_pred = svr_pipe.predict(X_test)
-    y_pred_without_scaling = svr_pipe_without_scaling.predict(X_test)
+    y_pred = pipe.predict(X_test.values)
+    # y_pred = model.predict(X_test)
 
-    return svr_pipe, y_pred
+    return pipe, y_pred
 
 
 def print_results(model, y_test, y_pred):
@@ -97,8 +97,8 @@ if __name__ == '__main__':
 
     # Create model
     model, y_pred = svr(df, md.X_train, md.y_train, md.X_test, md.y_test)
-    model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
-    model3, y_pred3 = svr(df, md3.X_train, md3.y_train, md3.X_test, md3.y_test)
+    # model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
+    # model3, y_pred3 = svr(df, md3.X_train, md3.y_train, md3.X_test, md3.y_test)
 
     # Create reports
     reports = ['stability']
@@ -109,8 +109,8 @@ if __name__ == '__main__':
     feature_names = feature_names.drop('springback').to_numpy()
 
     # partial_dependence_plot(model, md, feature_names, name)
-    model = model.named_steps['support_vector_machine']
-    feature_importance_plot(model, df, name)
-
+    # model = model.named_steps['support_vector_machine']
+    # feature_importance_plot(model, df, name)
+    permutation_feature_importance(model, md, df)
 
     # create_reports(name, reports, md, model, y_pred)
