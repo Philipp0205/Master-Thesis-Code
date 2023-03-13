@@ -15,9 +15,9 @@ if __name__ == '__main__':
     # 'data/cycle_vs_single_test/single_measurements/messreihe_3/results/'
 
     root = dp.get_root_directory()
-    dataset_folder = f'{root}/data/dataset/'
+    dataset_folder = f'{root}/data/dataset/V20'
 
-    parent_folder = f'{root}/dip_test/'
+    parent_folder = f'{root}/data/dataset/V20/'
 
     tra_input_directory = f'{parent_folder}tra/'
     tra_output_directory = f'{parent_folder}cleared/'

@@ -3,6 +3,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.inspection import PartialDependenceDisplay
+from learner.visualizing_results.local_model_agnostic_methods import *
 
 import learner.data_preprocessing as preprocessing
 from learner.visualizing_results.global_model_agnostic_methods import *
@@ -63,7 +64,7 @@ if __name__ == '__main__':
 
     # partial_dependence_plot(model, model_data, feature_names, name)
     # feature_importance(model, df, name)
-    feature_imprtance_yellowbrick(model, model_data)
+    create_lime_explanation(name, model, df, model_data)
 
     # reports = ['stability']
     # create_reports(name, reports, model_data, model, y_pred)

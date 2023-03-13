@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_divAN8FVU176L0EAK8"></div>
+        <div class="lime top_div" id="top_div4C5OB9A6MZZXXY0"></div>
         
         <script>
-        var top_div = d3.select('#top_divAN8FVU176L0EAK8').classed('lime top_div', true);
+        var top_div = d3.select('#top_div4C5OB9A6MZZXXY0').classed('lime top_div', true);
         
         
                     var pp_div = top_div.append('div')
                                         .classed('lime predicted_value', true);
                     var pp_svg = pp_div.append('svg').style('width', '100%');
-                    var pp = new lime.PredictedValue(pp_svg, 0.514691488049723, 0.31424024992318933, 5.83979904284863);
+                    var pp = new lime.PredictedValue(pp_svg, 0.514691488049723, 0.3687498148618268, 5.844956466176865);
                     
         var exp_div;
             var exp = new lime.Explanation(["negative", "positive"]);
         
             exp_div = top_div.append('div').classed('lime explanation', true);
-            exp.show([["1.50 < thickness <= 2.50", -1.0396166326557024], ["distance <= 5.00", -0.5820091042317993], ["20.00 < die_opening <= 40.00", 0.03576846577714316]], 1, exp_div);
+            exp.show([["1.50 < thickness <= 2.50", -1.008594167030746], ["distance <= 5.00", -0.5687008105340184], ["20.00 < die_opening <= 40.00", 0.0437146098829352]], 1, exp_div);
             
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["thickness", "2.50", -1.0396166326557024], ["distance", "2.50", -0.5820091042317993], ["die_opening", "30.00", 0.03576846577714316]], 1, raw_div);
+            exp.show_raw_tabular([["thickness", "2.50", -1.008594167030746], ["distance", "2.50", -0.5687008105340184], ["die_opening", "30.00", 0.0437146098829352]], 1, raw_div);
         
         </script>
         </body></html>
