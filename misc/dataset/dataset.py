@@ -78,6 +78,9 @@ def visualize_dataset():
     legend.get_frame().set_edgecolor('b')
     legend.get_frame().set_linewidth(0.0)
 
+    # Place legend outside of plot
+    plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
     plt.xlabel('Thickness $t$ [mm]')
     plt.ylabel('Die opening $V$ [mm]')
 
