@@ -146,6 +146,9 @@ def get_data():
     # Round distance of df
     df['distance'] = df['distance'].round(1)
 
+    # Sort dataframe by spring back
+    df = df.sort_values(by=['springback'])
+
     return df
 
 

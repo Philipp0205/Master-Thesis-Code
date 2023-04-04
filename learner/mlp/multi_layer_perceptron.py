@@ -7,6 +7,7 @@ from learner.visualizing_results.local_model_agnostic_methods import *
 
 import learner.data_preprocessing as preprocessing
 from learner.visualizing_results.global_model_agnostic_methods import *
+from reports.reports_main import create_reports
 
 
 def mlp(md):
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
     # partial_dependence_plot(model, model_data, feature_names, name)
     # feature_importance(model, df, name)
-    create_lime_explanation(name, model, df, model_data)
+    # create_lime_explanation(name, model, df, model_data)
 
-    # reports = ['stability']
-    # create_reports(name, reports, model_data, model, y_pred)
+    reports = ['resource']
+    create_reports(name, reports, model_data, model, y_pred)

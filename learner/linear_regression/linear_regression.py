@@ -117,6 +117,6 @@ if __name__ == '__main__':
 
     name = "LR"
 
-    reports = ['resource']
+    reports = ['correctness']
     create_reports(name, reports, model_data, model, y_pred)
-    create_reports(name, reports, model_data2, model2, y_pred2)
+    # create_reports(name, reports, model_data2, model2, y_pred2)

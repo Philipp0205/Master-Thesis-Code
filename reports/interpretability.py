@@ -1,4 +1,3 @@
-import RegscorePy as rs
 import matplotlib.pyplot as plt
 from sklearn.inspection import PartialDependenceDisplay
 import scienceplots

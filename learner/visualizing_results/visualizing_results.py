@@ -11,7 +11,7 @@ import learner.support_vector_machine.support_vector_machine as svm
 import learner.random_forest.random_forest as rfr
 import learner.extra_trees.extra_trees as etr
 import learner.linear_regression.linear_regression as lr
-import learner.mlp.mlp as mlp
+import learner.mlp.multi_layer_perceptron as mlp
 import learner.data_preprocessing as dp
 
 import learner.data_preprocessing as dp
@@ -167,10 +167,9 @@ def visualize_model_vs_example(model, df, die_opening, thickness):
 
 def visualize_all_results_for_example(die_opening, thickness):
     df = dp.get_data()
-
     md = dp.non_random_split(df, 30)
 
-    svm_model, y_pred = svm.svr(df, md.X_train, md.y_train, md.X_test, md.y_test)
+    svm_model, y_pred = svm.svr(df, md)
     df_result_svm = visualize_model_vs_example(svm_model, df, die_opening, thickness)
 
     rf_model, y_pred = rfr.random_forest(md)
@@ -237,5 +236,6 @@ if __name__ == '__main__':
     # visualize_all_results_for_example(30, 2)
     # visualize_all_results_for_example(30, 1.5)
     # visualize_all_results_for_example(30, 2.0)
+    visualize_all_results_for_example(10, 1)
+    visualize_all_results_for_example(30, 1.5)
     visualize_all_results_for_example(50, 0.5)
-    visualize_all_results_for_example(50, 1)

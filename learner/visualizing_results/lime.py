@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from lime import lime_tabular
 import learner.data_preprocessing as preprocessing
-import learner.mlp.mlp as mlp
+import learner.mlp.multi_layer_perceptron as mlp
 import learner.random_forest.random_forest as rf
 
 

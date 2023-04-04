@@ -4,12 +4,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.inspection import PartialDependenceDisplay
-from yellowbrick.features import Rank1D
 
 import learner.data_preprocessing as dp
 import scienceplots
-from yellowbrick.datasets import load_concrete
-from yellowbrick.model_selection import FeatureImportances
 
 
 def partial_dependence_plot(model, md, feature_names, name):

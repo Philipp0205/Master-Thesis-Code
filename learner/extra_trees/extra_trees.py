@@ -100,7 +100,7 @@ if __name__ == '__main__':
     # grid_search(model)
 
     name = 'ET'
-    reports = ['stability']
+    reports = ['resource']
     create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)
     # create_reports(name, reports, model_data3, model3, y_pred3)

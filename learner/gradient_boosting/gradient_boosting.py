@@ -10,7 +10,8 @@ from reports.reports_main import create_reports
 def gradient_boosting(model_data):
     pipe = Pipeline(
         [("scaler", StandardScaler()),
-         ("gradient_boosting", GradientBoostingRegressor(
+         ("gradient_boosting",
+          GradientBoostingRegressor(
              loss='huber',
              learning_rate=0.1,
              max_depth=4,
@@ -19,11 +20,14 @@ def gradient_boosting(model_data):
              n_estimators=200,
          ))])
 
-    pipe.fit(model_data.X_train, model_data.y_train)
+    pipe2 = GradientBoostingRegressor(
+        max_depth=5,
+    )
 
-    y_pred = pipe.predict(model_data.X_test)
+    pipe2.fit(model_data.X_train, model_data.y_train)
+    y_pred = pipe2.predict(model_data.X_test)
 
-    return pipe, y_pred
+    return pipe2, y_pred
 
 
 def grid_search(model, model_data):
@@ -68,11 +72,11 @@ if __name__ == '__main__':
     model_data2 = preprocessing.random_split(df, 0.3)
 
     model, y_pred = gradient_boosting(model_data)
-    model2, y_pred2 = gradient_boosting(model_data2)
+    # model2, y_pred2 = gradient_boosting(model_data2)
 
     # grid_search(model, model_data)
 
     name = 'GBT'
-    reports = ['stability']
+    reports = ['resource']
     create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)

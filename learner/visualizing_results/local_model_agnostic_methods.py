@@ -2,7 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 import learner.data_preprocessing as preprocessing
 
-from lime import lime_tabular
 
 
 def create_lime_explanation(name, model, df, md):

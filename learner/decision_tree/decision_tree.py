@@ -1,4 +1,3 @@
-import dtreeviz
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -128,6 +127,6 @@ if __name__ == '__main__':
     feature_names = get_feature_names(df)
 
     name = 'DT'
-    reports = ['resource']
+    reports = ['correctness']
     create_reports(name, reports, model_data, model, y_pred)
-    create_reports(name, reports, model_data2, model2, y_pred2)
+    # create_reports(name, reports, model_data2, model2, y_pred2)

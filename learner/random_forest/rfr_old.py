@@ -319,7 +319,7 @@ def grid_search(pipe, X_train, y_train, X_test, y_test):
 
 
 def random_test_train_split(input_directory):
-    df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
+    df = pd.read_csv(input_directory / 'data.csv', delimiter=',')
 
     X = df[['distance', 'thickness', 'die_opening']]
     y = df['springback']
@@ -470,7 +470,7 @@ if __name__ == '__main__':
     project_root = get_project_root()
     input_directory = project_root / 'data' / 'dataset'
 
-    df = pd.read_csv(input_directory / 'consolidated.csv', delimiter=',')
+    df = pd.read_csv(input_directory / 'data.csv', delimiter=',')
     X, y, X_train, y_train, X_test, y_test = non_random_split(df, train_split)
 
     missing_values(X_train, 2)

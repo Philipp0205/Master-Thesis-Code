@@ -1,40 +1,51 @@
 import numpy as np
+import pandas as pd
 from sklearn.inspection import PartialDependenceDisplay
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from learner.data_preprocessing import *
-# import GridSearchCV from sklearn
 from sklearn.model_selection import GridSearchCV
 from reports.reports_main import create_reports
 import learner.data_preprocessing as dp
 from learner.visualizing_results.global_model_agnostic_methods import *
 
 
-def svr(df, X_train, y_train, X_test, y_test):
+def svr(df, md):
     # Best parameters: {'svr__C': 4000, 'svr__epsilon': 0.001, 'svr__gamma': 0.1,
     # 'svr__kernel': 'rbf'}
     svr_pipe = Pipeline([
-        ('scaler', MinMaxScaler(feature_range=(0, 1))),
-        ('support_vector_machine',
-         SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1))
-    ])
-
-    svr_pipe_without_scaling = Pipeline([
-        ('support_vector_machine',
-         SVR(kernel='rbf', C=4000, gamma=0.1, epsilon=0.001, degree=1))
+        ('scaler', StandardScaler()),
+        ('svr',
+         SVR(kernel='rbf',
+             C=5000,
+             degree=1,
+             epsilon=0.01,
+             gamma=0.01,
+             ))
     ])
 
     # Fit the models
-    svr_pipe.fit(X_train, y_train)
-    svr_pipe_without_scaling.fit(X_train, y_train)
+    svr_pipe.fit(md.X_train, md.y_train)
 
     # Predict the test set
-    y_pred = svr_pipe.predict(X_test)
-    y_pred_without_scaling = svr_pipe_without_scaling.predict(X_test)
+    y_pred = svr_pipe.predict(md.X_test)
 
     return svr_pipe, y_pred
+
+
+def untrained_svr():
+    return Pipeline([
+        ('scaler', StandardScaler()),
+        ('svr',
+         SVR(kernel='rbf',
+             C=5000,
+             degree=1,
+             epsilon=0.01,
+             gamma=0.01,
+             ))
+    ])
 
 
 def print_results(model, y_test, y_pred):
@@ -64,9 +75,11 @@ def grid_search(pipe, X_train, y_train, X_test, y_test):
 
     # Create range of candidate values
     param_grid = {'svr__C': [0.1, 1, 10, 100, 1000, 2000, 3000, 4000, 5000],
-                  'svr__gamma': [0.1],
-                  'svr__epsilon': [0.001],
-                  'svr__kernel': ['rbf']}
+                  'svr__gamma': [0.1, 0.01, 0.001, 0.0001, 0.00001],
+                  'svr__epsilon': [0.001, 0.01, 0.1, 1, 10, 100],
+                  'svr__kernel': ['rbf', 'linear', 'poly'],
+                  'svr__degree': [1, 2, 3, 4, 5],
+                  }
 
     # Create grid search
     grid = GridSearchCV(pipe, param_grid, refit=True, verbose=3)
@@ -92,25 +105,14 @@ if __name__ == '__main__':
 
     # Split data
     md = non_random_split(df, 30)
-    md2 = random_split(df, 0.3)
-    md3 = non_random_split_with_validation(df, 30)
 
     # Create model
-    model, y_pred = svr(df, md.X_train, md.y_train, md.X_test, md.y_test)
-    model2, y_pred2 = svr(df, md2.X_train, md2.y_train, md2.X_test, md2.y_test)
-    model3, y_pred3 = svr(df, md3.X_train, md3.y_train, md3.X_test, md3.y_test)
+    model, y_pred = svr(df, md)
 
     # Create reports
-    reports = ['stability']
+    reports = ['resource']
 
     name = "SVM"
-    feature_names = df.columns
-    # remove target variable
-    feature_names = feature_names.drop('springback').to_numpy()
 
-    # partial_dependence_plot(model, md, feature_names, name)
-    model = model.named_steps['support_vector_machine']
-    feature_importance_plot(model, df, name)
-
-
-    # create_reports(name, reports, md, model, y_pred)
+    create_reports(name, reports, md, model, y_pred)
+    # grid_search(model, md.X_train, md.y_train, md.X_test, md.y_test)

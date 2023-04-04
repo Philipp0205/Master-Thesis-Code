@@ -81,7 +81,7 @@ def correctness_report(name, model_data, model, y_pred):
     )
 
     print(f'MAE: {mae:.3f}')
-    print(f'MSE: {mse:.3f}')
+    # print(f'MSE: {mse:.3f}')
     print(f'RMSE: {rmse:.3f}')
 
 

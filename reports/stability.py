@@ -28,8 +28,11 @@ def loo_cv(X, y, model):
     # Print the average and standard deviation of the scores
     print('Random K-Fold CV: Accuracy = {:.3f} ± {:.3f}'.format(scores_rand.mean(),
                                                                 scores_rand.std()))
-    # print('LOOCV K-Fold CV: Accuracy = {:.3f} ± {:.3f}'.format(scores_loocv.mean(),
-    #                                                            scores_loocv.std()))
+    # Calculate loocv_mean as positive value
+    loocv_mean = -np.mean(scores_loocv)
+    loocv_std = np.std(scores_loocv)
+
+    print('LOOCV K-Fold CV: Accuracy = {:.3f} ± {:.3f}'.format(loocv_mean, loocv_std))
 
     return 2
 

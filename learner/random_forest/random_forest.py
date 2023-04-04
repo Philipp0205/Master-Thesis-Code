@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.inspection import permutation_importance
 from sklearn.model_selection import GridSearchCV
+from sklearn import tree
 
 from learner.data_preprocessing import *
 # import mean_squared_error from sklearn
@@ -8,8 +9,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 
-from reports.reports_main import create_reports
 import learner.data_preprocessing as preprocessing
+from reports.reports_main import create_reports
+
 
 
 def random_forest(model_data):
@@ -150,12 +152,21 @@ def permuation_feature_importance(model, md, df):
                   f" {r.importances_mean[i]:.3f}"
                   f" +/-  {r.importances_std[i]:.3f}")
 
-
     # iterate over the features in the model and print the feature name and its importance
     # for i in r.importances_mean.argsort()[::-1]:
     #     print(f" {feature_names[i]:<8}"
     #           f" {r.importances_mean[i]:.3f}"
     #           f" +/-  {r.importances_std[i]:.3f}")
+
+
+def visualize_random_forest(md):
+    model = RandomForestRegressor()
+    model.fit(md.X_train, md.y_train)
+
+    fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(4, 4), dpi=3000)
+    tree.plot_tree(model.estimators_[1], filled=True)
+
+    fig.savefig('rf_individualtree.png')
 
 
 if __name__ == '__main__':
@@ -177,9 +188,11 @@ if __name__ == '__main__':
 
     # feature_importances1(model.steps[1][1], df)
 
+    # visualize_random_forest(model_data)
+
     name = 'RF'
     # lime.create_lime_explanation(name, model, df, model_data)
     # lime.create_lime_subplot(model_data)
-    # reports = ['stability']
+    reports = ['resource']
     # create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)

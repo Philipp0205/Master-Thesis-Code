@@ -4,16 +4,14 @@ import random
 from pathlib import Path
 
 import matplotlib
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import scienceplots
-from joblib.numpy_pickle_utils import xrange
 
 import learner.data_preprocessing as pp
 
 from zyklen.models.distance_springback_diagram_model import DistanceSpringbackDiagramModel
 from zyklen.models.springback_model import SpringbackModel
+
 import scienceplots
 
 
@@ -188,8 +186,8 @@ def all_springbacks_consolidated(springack_diagrams, output_directory):
         thickness = round(thickness, 1)
 
         # ax1.scatter(diagram.distances, diagram.springbacks, label=diagram.name)
-        plt.xlabel('Distance [mm]')
-        plt.ylabel('Springback [mm]')
+        plt.xlabel('Punch Penetration [mm]')
+        plt.ylabel('Spring Back [mm]')
         # ax1.set_xlabel('Distance [mm]')
         # ax1.set_ylabel('Springback [mm]')
 
@@ -316,7 +314,7 @@ def consolidate_all_data_into_one_file():
         df = df.append(df_csv)
 
     # Save df to csv file
-    df.to_csv('data/dataset/consolidated.csv', index=False)
+    df.to_csv('data/dataset/data.csv', index=False)
 
 
 if __name__ == '__main__':
