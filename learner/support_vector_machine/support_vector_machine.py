@@ -110,7 +110,7 @@ if __name__ == '__main__':
     model, y_pred = svr(df, md)
 
     # Create reports
-    reports = ['resource']
+    reports = ['robustness']
 
     name = "SVM"
 

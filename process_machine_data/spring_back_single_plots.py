@@ -105,8 +105,8 @@ def calculate_springback(df, name, output_directory):
     ax1.annotate(f'{round(min_force, 2)} N, \n{round(min_distance, 2)} mm',
                  (min_x, min_y))
     ax1.annotate(f'{round(last_row_distance, 2)} mm', (last_row_x, last_row_y))
-    ax1.set_xlabel('Time [s]')
-    ax1.set_ylabel('Force [N]')
+    ax1.set_xlabel('Time / (s)')
+    ax1.set_ylabel('Force / (N)')
     ax1.legend()
 
     ax2.set_ylabel('Distance (mm)')
@@ -149,16 +149,16 @@ def calculate_spring_back_2(df, name, output_directory):
     #        )
 
     ax1.scatter(first_point_x, first_point_y, color='green', marker='x')
-    ax1.set_xlabel('Time [s]')
-    ax1.set_ylabel('Force [N]')
+    ax1.set_xlabel('Time / (s)')
+    ax1.set_ylabel('Force / (N)')
 
-    ax2.set_ylabel('Punch travel [mm]')
+    ax2.set_ylabel('Punch travel / (mm)')
     l2 = ax2.plot(x, y2, color='grey', label='punch travel')
     ax1.scatter(last_point_x, last_point_y, color='red', marker='x')
 
     ax1.legend(handles=l1 + l2)
     # ax1.set_title(name)
-    ax2.set_title(f'{name} sb: {round(spring_back, 3)}')
+    # ax2.set_title(f'{name} sb: {round(spring_back, 3)}')
 
     plt.savefig(f'{output_directory}{name}_springback.png', dpi=600, transparent=True)
     plt.clf()

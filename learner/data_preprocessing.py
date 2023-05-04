@@ -174,7 +174,6 @@ def random_split(df, test_size):
     y = df['springback']
 
     # Split the data into training and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size,
-                                                        random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
 
     return ModelDataModel(X, y, X_train, y_train, X_test, y_test, None, None)

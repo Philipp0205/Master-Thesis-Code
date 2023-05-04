@@ -41,5 +41,5 @@ if __name__ == '__main__':
 
     # grid_search(model_data, model)
     name = 'AB'
-    reports = ['robustness']
+    reports = ['correctness']
     create_reports(name, reports, model_data, model, y_pred)

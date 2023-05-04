@@ -1,4 +1,4 @@
-import pandas as pd
+\usepackage{ulem}import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sn
 import matplotlib

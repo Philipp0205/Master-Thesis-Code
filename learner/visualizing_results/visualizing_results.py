@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from skimage.metrics import mean_squared_error
 from sklearn.inspection import PartialDependenceDisplay
 
 import learner.data_preprocessing as dp
@@ -113,7 +114,7 @@ def visualize_mean_spring_backs(df):
 def visualize_model_vs_example(model, df, die_opening, thickness):
     plt.style.use(['science', 'grid', 'ieee'])
 
-    # Get all data where die opening and and thicknesses are equal to the current
+    # Get all data where die opening and thicknesses are equal to the current
     df_part = df.loc[(df['die_opening'] == die_opening) & (df['thickness'] == thickness)]
 
     # Sort df_test by distance
@@ -129,6 +130,8 @@ def visualize_model_vs_example(model, df, die_opening, thickness):
 
     # Remove all rows where die_opening is equal to die_opening and
     # thickness is equal to thickness
+    # This is done to prevent overfitting
+    # -> No bias
     df_train_new = df_train.loc[~((df_train['die_opening'] == die_opening) & (
             df_train['thickness'] == thickness))]
 
@@ -168,6 +171,7 @@ def visualize_model_vs_example(model, df, die_opening, thickness):
 def visualize_all_results_for_example(die_opening, thickness):
     df = dp.get_data()
     md = dp.non_random_split(df, 30)
+    md2 = dp.random_split(df, 0.2)
 
     svm_model, y_pred = svm.svr(df, md)
     df_result_svm = visualize_model_vs_example(svm_model, df, die_opening, thickness)
@@ -187,38 +191,54 @@ def visualize_all_results_for_example(die_opening, thickness):
              markersize=2,
              linestyle='solid')
 
-    plt.plot(df_result_svm['distance'], df_result_svm['pred_springback'], label='SVM',
+    # Calculate RMSE for SVM
+    rmse_svm = np.sqrt(mean_squared_error(df_result_svm['mean_springback'],
+                                          df_result_svm['pred_springback']))
+
+    plt.plot(df_result_svm['distance'], df_result_svm['pred_springback'], label=f'SVM ({rmse_svm:.2f})',
              marker='o',
              markersize=2,
              color='red',
              linestyle='dotted')
 
-    plt.plot(df_result_rf['distance'], df_result_rf['pred_springback'], label='RF',
+    # Calculate RMSE for RF
+    rmse_rf = np.sqrt(mean_squared_error(df_result_rf['mean_springback'],
+                                         df_result_rf['pred_springback']))
+
+    plt.plot(df_result_rf['distance'], df_result_rf['pred_springback'], label=f'RF ({rmse_rf:.2f})',
              marker='o',
              markersize=2,
              color='blue',
              linestyle='dotted')
+    # Calculate RMSE for ET
+    rmse_et = np.sqrt(mean_squared_error(df_result_et['mean_springback'],
+                                         df_result_et['pred_springback']))
 
-    plt.plot(df_result_et['distance'], df_result_et['pred_springback'], label='ET',
+    plt.plot(df_result_et['distance'], df_result_et['pred_springback'], label=f'ET ({rmse_et:.2f})',
              marker='o',
              markersize=2,
              color='green',
              linestyle='dotted')
 
-    plt.plot(df_result_mlp['distance'], df_result_mlp['pred_springback'], label='MLP',
+    # Calculate RMSE for MLP
+    rmse_mlp = np.sqrt(mean_squared_error(df_result_mlp['mean_springback'],
+                                          df_result_mlp['pred_springback']))
+
+    plt.plot(df_result_mlp['distance'], df_result_mlp['pred_springback'], label=f'MLP ({rmse_mlp:.2f})',
              marker='o',
              markersize=2,
              color='purple',
              linestyle='dotted')
 
     plt.legend()
+    # Make legend transparent
+    plt.gca().get_legend().get_frame().set_alpha(0)
+
     plt.xlabel('$y_p$')
     plt.ylabel('$SB$')
     plt.savefig(f'performance_{die_opening}_{thickness}.png', dpi=600, transparent=True)
 
     plt.clf()
-
-
 
 
 if __name__ == '__main__':
@@ -231,11 +251,11 @@ if __name__ == '__main__':
     # \item V30, t1.5 (15)
     # \item V50 t0.5 (100)
 
-    # visualize_all_results_for_example(20, 3)
-    # visualize_all_results_for_example(20, 1)
-    # visualize_all_results_for_example(30, 2)
-    # visualize_all_results_for_example(30, 1.5)
-    # visualize_all_results_for_example(30, 2.0)
-    visualize_all_results_for_example(10, 1)
+    visualize_all_results_for_example(20, 3.0)
+    visualize_all_results_for_example(20, 2.0)
+
     visualize_all_results_for_example(30, 1.5)
+    visualize_all_results_for_example(20, 1.5)
+
     visualize_all_results_for_example(50, 0.5)
+    visualize_all_results_for_example(40, 0.5)

@@ -10,8 +10,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 
 import learner.data_preprocessing as preprocessing
+from learner.visualizing_results.global_model_agnostic_methods import *
 from reports.reports_main import create_reports
-
 
 
 def random_forest(model_data):
@@ -178,7 +178,7 @@ if __name__ == '__main__':
     model, y_pred = random_forest(model_data)
     model2, y_pred2 = random_forest(model_data2)
 
-    permuation_feature_importance(model, model_data, df)
+    # permuation_feature_importance(model, model_data, df)
 
     # grid_search(model, model_data)
 
@@ -190,9 +190,11 @@ if __name__ == '__main__':
 
     # visualize_random_forest(model_data)
 
+
+
     name = 'RF'
     # lime.create_lime_explanation(name, model, df, model_data)
     # lime.create_lime_subplot(model_data)
-    reports = ['resource']
-    # create_reports(name, reports, model_data, model, y_pred)
+    reports = ['robustness']
+    create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)

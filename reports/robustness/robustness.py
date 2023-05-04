@@ -2,6 +2,9 @@ import os
 from os import listdir
 from os.path import isfile, join
 
+from numpy import var
+from sklearn.utils import shuffle
+
 import numpy as np
 from joblib.numpy_pickle_utils import xrange
 from scipy.interpolate import make_interp_spline
@@ -14,7 +17,7 @@ import matplotlib.pyplot as plt
 
 from scipy import stats
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 import learner.data_preprocessing as dp
 
@@ -70,7 +73,7 @@ def missing_values(name, model_data, model):
 
     number_of_samples = len(X)
 
-    number_of_folds = 2
+    number_of_folds = 5
 
     plt.style.use(['science', 'grid'])
 
@@ -142,41 +145,56 @@ def calculate_variance_of_cross_validation(X, y, model):
     return variance_of_cv
 
 
-def test_for_different_test_train_split(df, model, name):
+def missing_values_test(df, model, name):
     root = dp.get_root_directory()
     path = f'{root}/reports/robustness/results/csv/'
 
     # Read missing_values.csv file
-    df_result = pd.read_csv(f'{path}missing_values.csv')
+    df_result = pd.read_csv(f'{path}missing_values2.csv')
 
     # Delete all rows of df result where model_name is equal to name
     df_result = df_result[df_result.model_name != name]
 
-    # iterate from 0.1 to 1 in 0.1 steps
     for i in range(1, 10):
-        print(f'split = {i / 10}')
-        split = pp.random_split(df, i / 10)
+        print(f'test_train_split = {i / 10}')
 
-        model.fit(split.X_train, split.y_train)
-
-        # Predict with the model 10 times and calculate the mean of the mse
         mses = []
-        for i2 in range(20):
+        rmses = []
+        r2s = []
+        # create 10 different random splits
+        for i2 in range(10):
+            split = pp.random_split(df, i / 10)
+            model.fit(split.X_train, split.y_train)
+
+            # Predict with the model 10 times and calculate the mean of the mse
             y_pred = model.predict(split.X_test)
             mse = mean_squared_error(split.y_test, y_pred)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(split.y_test, y_pred)
+
             mses.append(mse)
+            rmses.append(rmse)
+            r2s.append(r2)
 
         mse = np.mean(mses)
-        print(f'MSE: {round(mse, 3)}')
-        # Concrat df_result with new row
-        df_result = df_result.append({'model_name': name,
-                                      'test_train_split': i / 10, 'mse': mse},
-                                     ignore_index=True)
+        rmse = np.mean(rmses)
+        r2 = np.mean(r2s)
+
+
+        df_to_concat = pd.DataFrame({'model_name': name,
+                                     'test_train_split': i / 10, 'mse': mse, 'rmse': rmse, 'r2': r2}, index=[0])
+        df_result = pd.concat([df_result, df_to_concat], ignore_index=True)
+
+        # Concat df_result with new row
 
         # Save df as csv file
-        df_result.to_csv(f'{path}missing_values.csv', index=False)
+    df_result.to_csv(f'{path}missing_values2.csv', index=False)
+    plot_missing_values_test(path)
 
+
+def plot_missing_values_test(path):
     # Get all unique model names from df_result
+    df_result = pd.read_csv(f'{path}missing_values2.csv')
     model_names = df_result['model_name'].unique()
 
     plt.style.use(['science', 'grid'])
@@ -190,13 +208,13 @@ def test_for_different_test_train_split(df, model, name):
         x = df_for_plot['test_train_split']
         x = x * 100
 
-        y = df_for_plot['mse']
+        y = df_for_plot['rmse']
 
         plt.plot(x, y, label=model_name)
 
     # plt.title(f'Missing values Test')
     plt.xlabel('Percentage of data used for testing')
-    plt.ylabel('MSE')
+    plt.ylabel('RMSE')
     plt.legend()
 
     # Place legend on the right out side plot
@@ -206,6 +224,78 @@ def test_for_different_test_train_split(df, model, name):
     plt.legend(framealpha=0)
 
     plt.savefig(f'{path}missing_values_plot.png', dpi=600, transparent=True)
+    plt.clf()
+
+
+# Perform k fold cross validation on different number of folds
+def missing_values_test_2(df, model, name, model_data):
+    # Path for the result file
+    root = dp.get_root_directory()
+    path = f'{root}/reports/robustness/results/csv/'
+
+    max_folds = 15
+
+    cv_scores = []
+    variances = []
+
+    # get df from csv file
+    df = pd.read_csv(f'{path}missing_values_cv.csv')
+
+    X, y = shuffle(model_data.X, model_data.y, random_state=42)
+
+    # if name is already in df, delete all rows where name is equal to name
+    if name in df['name'].values:
+        df = df[df.name != name]
+
+    for i in range(2, max_folds):
+        # perform k fold cross validation with i folds
+        scores = cross_val_score(model, X, y, cv=i, scoring='neg_root_mean_squared_error')
+        print(scores)
+
+        mean_cv_score = scores.mean()
+
+        # calculate variance of cross validation
+        variance_of_cv = np.var(scores, ddof=1)
+
+        df = pd.concat([df,
+                        pd.DataFrame({'name': name, 'folds': i, 'cv_score': mean_cv_score, 'variance': variance_of_cv},
+                                     index=[0])], ignore_index=True)
+
+    df.to_csv(f'{path}missing_values_cv.csv', index=False)
+    plot_missing_values_test_2(f'{path}')
+
+
+def plot_missing_values_test_2(path):
+    # read csv file at path
+    df = pd.read_csv(f'{path}/missing_values_cv.csv')
+
+    plt.style.use(['science', 'grid'])
+
+    # Get all unique model names from df_result
+    model_names = df['name'].unique()
+
+    # Iterate over all model names
+    for model_name in model_names:
+        # Get all rows where model_name is equal to model_name
+        df_for_plot = df[df.name == model_name]
+
+        rmses = df_for_plot['cv_score']
+        variance_of_rmse = var(rmses)
+
+        # get x and y values
+        x = df_for_plot['folds']
+        y = df_for_plot['variance']
+
+        plt.plot(x, y, label=f'{model_name} ({variance_of_rmse})')
+
+    plt.legend()
+    # Put a legend to the right of the current axis
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0., frameon=False)
+
+    plt.xlabel('Number of folds')
+    plt.ylabel('Mean score')
+
+    plt.savefig(f'{path}/missing_values_cv.png', dpi=600, transparent=True)
     plt.clf()
 
 
@@ -347,7 +437,9 @@ def test_with_noise_2(name, md, untrained_model):
     noise = noise.sample(1000)
 
     mses_noisy = []
+    rmses_noisy = []
     mses_clean = []
+    rmses_clean = []
     noise_level = []
 
     # Add noise gradually to the training and create models for each step
@@ -376,6 +468,7 @@ def test_with_noise_2(name, md, untrained_model):
         # Evaluate the model on the noisy testing data
         y_pred_noisy = untrained_model.predict(X_test_noisy)
         mse_noisy = mean_squared_error(y_test_noisy, y_pred_noisy)
+        rmse_noisy = np.sqrt(mse_noisy)
         print("MSE on noisy test set: ", mse_noisy)
 
         # Train a linear regression model on the clean training data
@@ -384,18 +477,23 @@ def test_with_noise_2(name, md, untrained_model):
         # Evaluate the model on the clean testing data
         y_pred_clean = untrained_model_clean.predict(md.X_test)
         mse_clean = mean_squared_error(md.y_test, y_pred_clean)
+        rmse_clean = np.sqrt(mse_clean)
         print("MSE on clean test set: ", mse_clean)
 
         mses_noisy.append(mse_noisy)
+        rmses_noisy.append(rmse_noisy)
         mses_clean.append(mse_clean)
+        rmses_clean.append(rmse_clean)
         noise_level.append(percent)
 
     # Save mses to csv
     root = dp.get_root_directory()
     output_dir = f'{root}/reports/robustness/'
 
-    new_result = pd.DataFrame({'name': name, 'mse_noisy': mses_noisy, 'mse_clean': mses_clean, 'noise_level':
-        noise_level})
+    new_result = pd.DataFrame({'name': name, 'mse_noisy': mses_noisy, 'rmse_noisey': rmses_noisy,
+                               'mse_clean': mses_clean,
+                               'rmse_clean': rmses_clean,
+                               'noise_level': noise_level})
 
     # Save results to csv check if rows with the same name already exist if yes replace them
     if os.path.exists(f'{output_dir}results_noise2.csv'):
@@ -483,23 +581,20 @@ def plot_results_noise():
         color = colors.pop()
 
         # Create a series wit 11 times the first value
-        base_value = pd.Series([df_model['mse_clean'].iloc[0]] * 11)
-
-
+        base_value = pd.Series([df_model['rmse_clean'].iloc[0]] * 11)
 
         # Plot results, use same color for noisy and clean
-        plt.plot(df_model['noise_level'], df_model['mse_noisy'], color=color, linestyle='solid',
+        plt.plot(df_model['noise_level'], df_model['rmse_noisey'], color=color, linestyle='solid',
                  label={f'{model_name}'}, linewidth=1)
+
         plt.plot(df_model['noise_level'], base_value, linestyle='dashed', color=color, linewidth=0.8)
 
         plt.xlabel('Noise')
-        plt.ylabel('MSE')
+        plt.ylabel('RMSE')
 
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
         # make legend transparent
         plt.gca().get_legend().get_frame().set_alpha(0)
-
-
 
         plt.savefig(f'{root_dir}/reports/robustness/results_noise.png', dpi=600, transparent=True)
 
@@ -568,11 +663,14 @@ def robustness_report(name, model_data, model, y_pred):
     # Merge model_data.Xand model_data.y
     df = pd.concat([model_data.X, model_data.y], axis=1)
 
-    # test_for_different_test_train_split(df, model, name)
+    # missing vlues
+    missing_values_test(df, model, name)
     # variance_missing_values(model_data, model)
+    # missing_values_test_2(df, model, name, model_data)
 
+    # noise
     # test_with_noise_2(name, model_data, model)
-    plot_results_noise()
+    # plot_results_noise()
 
     print('--------------')
 

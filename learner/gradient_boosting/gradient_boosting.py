@@ -77,6 +77,6 @@ if __name__ == '__main__':
     # grid_search(model, model_data)
 
     name = 'GBT'
-    reports = ['resource']
+    reports = ['robustness']
     create_reports(name, reports, model_data, model, y_pred)
     # create_reports(name, reports, model_data2, model2, y_pred2)

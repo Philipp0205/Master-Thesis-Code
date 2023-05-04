@@ -15,9 +15,9 @@ if __name__ == '__main__':
     # 'data/cycle_vs_single_test/single_measurements/messreihe_3/results/'
 
     root = dp.get_root_directory()
-    dataset_folder = f'{root}/data/dataset/V20/'
+    dataset_folder = f'{root}/data/dataset/V30/'
 
-    parent_folder = f'{root}/data/dataset/V20/'
+    parent_folder = f'{root}/data/dataset/V30/'
 
     tra_input_directory = f'{parent_folder}tra/'
     tra_output_directory = f'{parent_folder}cleared/'
@@ -25,8 +25,8 @@ if __name__ == '__main__':
     # springback_output_directory = f'data/results/'
 
     # iterate_through_folder_and_convert_tra_to_csv(parent_folder)
-    # each_tra_to_springback_plot(parent_folder, springback_output_directory)
+    each_tra_to_springback_plot(parent_folder, springback_output_directory)
     # all_springbacks_plot(parent_folder, springback_output_directory)
 
-    consolidate_all_data_into_one_file()
+    # consolidate_all_data_into_one_file()
     print('Done!')

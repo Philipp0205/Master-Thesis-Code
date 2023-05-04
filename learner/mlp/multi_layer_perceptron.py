@@ -3,7 +3,6 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.inspection import PartialDependenceDisplay
-from learner.visualizing_results.local_model_agnostic_methods import *
 
 import learner.data_preprocessing as preprocessing
 from learner.visualizing_results.global_model_agnostic_methods import *
@@ -67,5 +66,5 @@ if __name__ == '__main__':
     # feature_importance(model, df, name)
     # create_lime_explanation(name, model, df, model_data)
 
-    reports = ['resource']
+    reports = ['robustness']
     create_reports(name, reports, model_data, model, y_pred)

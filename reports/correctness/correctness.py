@@ -2,14 +2,26 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import cross_val_score
+
 import learner.data_preprocessing as pre
 import scienceplots
 
 
-def calculate_correctness(model, y_test, y_pred):
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
+def calculate_correctness(model, model_data, y_pred):
+    # Perform 5 fold cross validation with MAE and RMSE
+    mae = cross_val_score(model, model_data.X_test, model_data.y_test, scoring='neg_mean_absolute_error', cv=5)
+    mse = cross_val_score(model, model_data.X_test, model_data.y_test, scoring='neg_mean_squared_error', cv=5)
+    rmse = cross_val_score(model, model_data.X_test, model_data.y_test, scoring='neg_root_mean_squared_error', cv=5)
+
+    # Calculate mean of MAE and RMSE and make it positive
+    mae = np.mean(mae) * (-1)
+    mse = np.mean(mse) * (-1)
+    rmse = np.mean(rmse) * (-1)
+
+    # mae = mean_absolute_error(y_test, y_pred)
+    # mse = mean_squared_error(y_test, y_pred)
+    # rmse = np.sqrt(mse)
 
     return mae, mse, rmse
 
@@ -76,14 +88,13 @@ def correctness_report(name, model_data, model, y_pred):
 
     mae, mse, rmse = calculate_correctness(
         model,
-        model_data.y_test,
+        model_data,
         y_pred
     )
 
     print(f'MAE: {mae:.3f}')
     # print(f'MSE: {mse:.3f}')
     print(f'RMSE: {rmse:.3f}')
-
 
     # rmse_train, rmse_test, rmse_val = performance_test_train_val(model, model_data)
 
