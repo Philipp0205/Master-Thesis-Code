@@ -28,7 +28,7 @@ from misc import folders
 # :param df: The dataframe to split
 # :param train_split: The die_opening which should be excluded from the training set
 def non_random_split(df, train_split):
-    # correlations(df)
+    correlations(df)
 
     print(f'Number of samples: {len(df.index)}')
 
@@ -135,7 +135,7 @@ def correlations(df):
     # Plot heatmap
     plt.figure(dpi=600)
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
-    plt.savefig('results/correlation_matrix.png')
+    plt.savefig('correlation_matrix.png', transparent=True, dpi=600)
     plt.clf()
 
 

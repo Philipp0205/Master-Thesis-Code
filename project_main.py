@@ -25,8 +25,10 @@ if __name__ == '__main__':
     # springback_output_directory = f'data/results/'
 
     # iterate_through_folder_and_convert_tra_to_csv(parent_folder)
-    each_tra_to_springback_plot(parent_folder, springback_output_directory)
+    # each_tra_to_springback_plot(parent_folder, springback_output_directory)
     # all_springbacks_plot(parent_folder, springback_output_directory)
+    df = dp.get_data()
+    dp.non_random_split(df, 0.2)
 
     # consolidate_all_data_into_one_file()
     print('Done!')

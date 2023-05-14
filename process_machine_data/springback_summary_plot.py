@@ -119,8 +119,8 @@ def plot_all_springbacks(name, springback_models, output_directory):
     distance_springback_diagram_models = []
 
     ax1.plot(x_distances, y_springbacks, 'o', color='tab:blue')
-    ax1.set_xlabel('Distance [mm]')
-    ax1.set_ylabel('Springback [mm]')
+    ax1.set_xlabel('Distance / (mm)')
+    ax1.set_ylabel('Springback / (mm)')
     ax1.set_title('Springback of all springback models')
 
     # Save values in separate csv file
@@ -186,8 +186,8 @@ def all_springbacks_consolidated(springack_diagrams, output_directory):
         thickness = round(thickness, 1)
 
         # ax1.scatter(diagram.distances, diagram.springbacks, label=diagram.name)
-        plt.xlabel('Punch Penetration [mm]')
-        plt.ylabel('Spring Back [mm]')
+        plt.xlabel('Punch Penetration / (mm)')
+        plt.ylabel('Spring Back / (mm)')
         # ax1.set_xlabel('Distance [mm]')
         # ax1.set_ylabel('Springback [mm]')
 
